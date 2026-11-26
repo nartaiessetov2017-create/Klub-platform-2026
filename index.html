@@ -3731,7 +3731,74 @@ img { max-width: 100%; height: auto; }
             await initStaffDatabase();
             await initMtbDatabase();
             await initPaidServicesDatabase();
+async function saveDocumentToSupabase(docData) {
+  const { data, error } = await supabaseClient
+    .from('documents')
+    .insert([
+      {
+        title: docData.title,
+        category: docData.category,
+        doc_date: docData.doc_date,
+        content: docData.content
+      }
+    ])
+    .select();
 
+  if (error) {
+    console.error('Құжат сақтау қатесі:', error.message);
+    return null;
+  }
+  return data[0];
+}
+
+async function saveEmployeeToSupabase(empData) {
+  const { data, error } = await supabaseClient
+    .from('employees')
+    .insert([empData])
+    .select();
+
+  if (error) {
+    console.error('Қызметкер сақтау қатесі:', error.message);
+    return null;
+  }
+  return data[0];
+}async function saveDocumentToSupabase(docData) {
+  const { data, error } = await supabaseClient
+    .from('documents')
+    .insert([
+      {
+        title: docData.title,
+        category: docData.category,
+        doc_date: docData.doc_date,
+        content: docData.content
+      }
+    ])
+    .select();
+
+  if (error) {
+
+    console.error('Құжат сақтау қатесі:', error.message);
+    return null;
+  }
+  return data[0];
+}
+
+async function saveEmployeeToSupabase(empData) {
+  const { data, error } = await supabaseClient
+    .from('employees')
+    .insert([empData])
+    .select();
+
+  if (error) {
+    console.error('Қызметкер сақтау қатесі:', error.message);
+    return null;
+  }
+
+
+    return null;
+  }
+
+}
             renderQuartersSelector();
             renderQuarterMonths(1);
             renderClubs();
