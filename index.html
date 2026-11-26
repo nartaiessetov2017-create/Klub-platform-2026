@@ -3158,16 +3158,30 @@ img { max-width: 100%; height: auto; }
             });
         }
 
-        function saveMtbPassportToDb(html) {
-            return new Promise((resolve) => {
-                currentMtbHtml = html;
-                if (!mtbDb) return resolve();
-                const tx = mtbDb.transaction(MTB_STORE_NAME, 'readwrite');
-                tx.objectStore(MTB_STORE_NAME).put({ id: 'main_passport', html });
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => resolve();
-            });
-        }
+        async function saveMtbPassportToDb(html) {
+  currentMtbHtml = html;
+  // 1. Бұрынғыдай телефонға да сақтау
+  if(mtbDb){
+    try{
+      const tx = mtbDb.transaction(MTB_STORE_NAME, 'readwrite');
+      tx.objectStore(MTB_STORE_NAME).put({ id: 'main_passport', html });
+    }catch(e){}
+  }
+  // 2. ЕНДІ Supabase-ке де сақтау - МІНЕ НЕГІЗГІ ТҮЗЕТУ
+  try{
+    const { error } = await supabaseClient
+      .from('documents')
+      .insert([{
+        title: 'МТБ - Негізгі паспорт',
+        category: 'mtb_passport',
+        doc_date: new Date().toISOString().slice(0,10),
+        content: { html: html },
+        file_url: ''
+      }]);
+    if(error) console.log('Supabase қате:', error);
+    else console.log('Supabase-ке сақталды!');
+  }catch(e){ console.log('Supabase қате:', e); }
+}
 
         function renderMtbMainView() {
             const viewEl = document.getElementById('mtb-main-view-content');
