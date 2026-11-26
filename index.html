@@ -3924,8 +3924,249 @@ img { max-width: 100%; height: auto; }
   });
 })();
 </script>
-</body>
-</html>
+<script>
+(function () {
+  const SB_URL = "https://wlqnbxuzsesbnmiaedwe.supabase.co";
+  const SB_KEY = "sb_publishable_dW0gq6KoMMJF1X3peM6KqA_P_yqIsz9";
+
+  const sb =
+    window.supabaseClient ||
+    (window.supabase && window.supabase.createClient
+      ? window.supabase.createClient(SB_URL, SB_KEY)
+      : null);
+
+  if (!sb) {
+    console.error("Supabase клиенті табылмады. CDN скриптін тексеріңіз.");
+    return;
+  }
+
+  window.supabaseClient = sb;
+
+  // 1. Құжатты / іс-шараны / МТБ паспортын 'documents' кестесіне толық сақтау
+  window.saveDocumentToSupabase = async function (docData = {}) {
+    try {
+      const payload = {
+        title: String(docData.title || docData.name || "Құжат").trim(),
+        category: String(docData.category || docData.type || "general").trim(),
+        doc_date:
+          docData.doc_date ||
+          docData.date ||
+          new Date().toISOString().slice(0, 10),
+        content:
+          typeof docData.content === "string"
+            ? {
+                html: docData.content,
+                file_url: docData.file_url || ""
+              }
+            : {
+                ...(docData.content || {}),
+                file_url:
+                  docData.file_url ||
+                  (docData.content && docData.content.file_url) ||
+                  ""
+              }
+      };
+
+      const { data, error } = await sb
+        .from("documents")
+        .insert([payload])
+        .select();
+
+      if (error) {
+        console.error("Supabase 'documents' кестесіне сақтау қатесі:", error);
+        return null;
+      }
+
+      console.log("Supabase 'documents' кестесіне сақталды:", data);
+      return data && data[0] ? data[0] : true;
+    } catch (err) {
+      console.error("saveDocumentToSupabase күтпеген қатесі:", err);
+      return null;
+    }
+  };
+
+  // 2. Қызметкерді 'employees' кестесіне толық сақтау
+  window.saveEmployeeToSupabase = async function (empData = {}) {
+    try {
+      const fullName = String(
+        empData.full_name || empData.name || empData.fio || ""
+      ).trim();
+      const position = String(
+        empData.position || empData.role || empData.title || ""
+      ).trim();
+      const phone = String(empData.phone || empData.tel || "").trim();
+      const notes =
+        typeof empData.notes === "string"
+          ? empData.notes
+          : empData.info || "";
+
+      const payload = {
+        full_name: fullName || "Аты-жөні көрсетілмеген",
+        position: position,
+        phone: phone,
+        notes: notes,
+        extra: empData
+      };
+
+      const { data, error } = await sb
+        .from("employees")
+        .insert([payload])
+        .select();
+
+      if (error) {
+        console.error("Supabase 'employees' кестесіне сақтау қатесі:", error);
+        return null;
+      }
+
+      console.log("Supabase 'employees' кестесіне сақталды:", data);
+      return data && data[0] ? data[0] : true;
+    } catch (err) {
+      console.error("saveEmployeeToSupabase күтпеген қатесі:", err);
+      return null;
+    }
+  };
+
+  // 3. Базадан 'documents' және 'employees' жазбаларын толық оқу
+  window.loadAllFromSupabase = async function () {
+    try {
+      const [docsRes, empRes] = await Promise.all([
+        sb.from("documents").select("*").order("id", { ascending: false }),
+        sb.from("employees").select("*").order("id", { ascending: false })
+      ]);
+
+      if (docsRes.error) {
+        console.error("Supabase 'documents' оқу қатесі:", docsRes.error);
+      }
+      if (empRes.error) {
+        console.error("Supabase 'employees' оқу қатесі:", empRes.error);
+      }
+
+      window.__SUPA_CACHE__ = {
+        documents: docsRes.data || [],
+        employees: empRes.data || []
+      };
+
+      console.log("Supabase деректері жүктелді:", window.__SUPA_CACHE__);
+      return window.__SUPA_CACHE__;
+    } catch (err) {
+      console.error("loadAllFromSupabase күтпеген қатесі:", err);
+      return { documents: [], employees: [] };
+    }
+  };
+
+  // 4. Контейнердегі (форма немесе модальді терезе) өрістерді жинау
+  function collectContainerData(container) {
+    if (!container) return {};
+    const result = {};
+    container.querySelectorAll("input, textarea, select").forEach((el, idx) => {
+      if (el.type === "password" || el.type === "file") return;
+      const key = el.name || el.id || `field_${idx}`;
+      result[key] = el.value;
+    });
+
+    // Rich editor немесе МТБ парағы болса, мәтінін/HTML-ін қоса алу
+    const editorEl = container.querySelector(
+      "[contenteditable='true'], .rich-editor-area, #mtb-main-view-sheet"
+    );
+    if (editorEl) {
+      result.html = editorEl.innerHTML;
+      result.text = (editorEl.innerText || "").trim();
+    }
+
+    return result;
+  }
+
+  // Қызметкерге қатысты контекст екенін анықтау
+  function isEmployeeContext(el) {
+    const container = el.closest("section, form, [role='dialog'], [id*='modal'], [class*='modal']");
+    const idAndClass = ((container?.id || "") + " " + (container?.className || "")).toLowerCase();
+    const text = (container?.innerText || "").toLowerCase();
+    return (
+      idAndClass.includes("staff") ||
+      idAndClass.includes("employee") ||
+      text.includes("қызметкер")
+    );
+  }
+
+  // 5. Форма жіберілгенде автоматты сақтау
+  document.addEventListener(
+    "submit",
+    async (e) => {
+      const form = e.target;
+      if (!form || form.closest("#auth-lock-screen")) return;
+
+      const values = collectContainerData(form);
+      if (isEmployeeContext(form)) {
+        await window.saveEmployeeToSupabase(values);
+      } else {
+        await window.saveDocumentToSupabase({
+          title:
+            values.title ||
+            values.name ||
+            values.eventTitle ||
+            values.docTitle ||
+            "Жаңа жазба",
+          category: values.category || values.type || "form_entry",
+          doc_date: values.doc_date || values.date,
+          content: values
+        });
+      }
+    },
+    true
+  );
+
+  // 6. "Сақтау" немесе "Қосу" батырмасы басылғанда автоматты сақтау
+  document.addEventListener(
+    "click",
+    async (e) => {
+      const btn = e.target.closest("button");
+      if (!btn || btn.closest("#auth-lock-screen")) return;
+
+      const label = (btn.innerText || "").trim().toLowerCase();
+      const isSave = label.includes("сақтау");
+      const isAdd = label.includes("қосу");
+      if (!isSave && !isAdd) return;
+
+      const scope =
+        btn.closest("form, [role='dialog'], [id*='modal'], [class*='modal'], section") ||
+        document.body;
+      const values = collectContainerData(scope);
+
+      const hasAnyValue = Object.values(values).some(
+        (v) => String(v || "").trim() !== ""
+      );
+      if (!hasAnyValue && !isSave) return;
+
+      if (isEmployeeContext(btn)) {
+        await window.saveEmployeeToSupabase(values);
+      } else if (isSave) {
+        const activeTab =
+          document.querySelector(".nav-btn.active")?.dataset?.tab || "document";
+        const docTitle =
+          values.title ||
+          values.name ||
+          document
+            .querySelector("#mtb-main-view-sheet .mtb-doc-header")
+            ?.innerText?.trim() ||
+          `Жазба (${activeTab})`;
+
+        await window.saveDocumentToSupabase({
+          title: docTitle,
+          category: values.category || activeTab,
+          doc_date: values.doc_date || values.date,
+          content: values
+        });
+      }
+    },
+    true
+  );
+
+  // 7. Бет ашылғанда базадағы деректерді жүктеу
+  window.addEventListener("DOMContentLoaded", () => {
+    window.loadAllFromSupabase();
+  });
+})();
 </script>
 </body>
 </html>
+
