@@ -4262,6 +4262,386 @@ img { max-width: 100%; height: auto; }
 </script>
 <script src="js/config.js"></script>
 <script src="supabase-sync.js"></script>
-</body>
+<script>
+(function () {
+  const sb = window.supabaseClient;
+  const BUCKET_NAME = "club-files";
+  if (!sb) return;
+
+  // PDF файлды Supabase Storage-ке жүктеу және сілтемесін алу
+  async function uploadPdfToStorage(file, folder) {
+    const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.pdf`;
+    const filePath = `${folder}/${safeName}`;
+
+    const { error: uploadError } = await sb.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, file, {
+        contentType: "application/pdf",
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error("Storage жүктеу қатесі:", uploadError);
+      showToast("PDF файлды бұлтқа жүктеу кезінде қате шықты!");
+      return null;
+    }
+
+    const { data } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+    return {
+      publicUrl: data.publicUrl,
+      storagePath: filePath
+    };
+  }
+
+  // Storage-тен файлды өшіру
+  async function deletePdfFromStorage(storagePath) {
+    if (!storagePath) return;
+    await sb.storage.from(BUCKET_NAME).remove([storagePath]);
+  }
+
+  // Барлық PDF тізімін Supabase-тен жүктеу
+  let cloudPdfCache = {
+    club: [],
+    staff: [],
+    paid: []
+  };
+
+  async function fetchCloudPdfs() {
+    const { data, error } = await sb
+      .from("documents")
+      .select("*")
+      .in("category", ["club_pdf", "staff_pdf", "paid_pdf"])
+      .order("id", { ascending: false });
+
+    if (error) {
+      console.error("Cloud PDF оқу қатесі:", error);
+      return;
+    }
+
+    cloudPdfCache = { club: [], staff: [], paid: [] };
+    (data || []).forEach((row) => {
+      const item = {
+        id: row.id,
+        ...(row.content || {}),
+        docTitle: row.title
+      };
+      if (row.category === "club_pdf") cloudPdfCache.club.push(item);
+      if (row.category === "staff_pdf") cloudPdfCache.staff.push(item);
+      if (row.category === "paid_pdf") cloudPdfCache.paid.push(item);
+    });
+
+    updateCloudClubCounts();
+    updateCloudStaffCounts();
+    if (typeof window.renderPaidServiceDocs === "function") {
+      window.renderPaidServiceDocs();
+    }
+  }
+
+  // ==================== 1. ҮЙІРМЕЛЕР PDF (SUPABASE STORAGE) ====================
+  function updateCloudClubCounts() {
+    const counts = {};
+    cloudPdfCache.club.forEach((item) => {
+      const sec = item.section || "plan";
+      if (!counts[item.clubId]) counts[item.clubId] = { total: 0 };
+      counts[item.clubId].total += 1;
+      counts[item.clubId][sec] = (counts[item.clubId][sec] || 0) + 1;
+    });
+    window.clubDocCounts = counts;
+    if (typeof window.renderClubs === "function") window.renderClubs();
+    if (typeof window.updateClubSectionTabBadges === "function" && window.currentClubId) {
+      window.updateClubSectionTabBadges();
+    }
+  }
+
+  window.handleClubPdfUpload = async function (e) {
+    e.preventDefault();
+    if (!window.currentClubId) return;
+    const titleInp = document.getElementById("club-doc-title");
+    const fileInp = document.getElementById("club-doc-file");
+    const docTitle = titleInp.value.trim();
+    const file = fileInp.files[0];
+    if (!docTitle || !file) return;
+
+    showToast("PDF бұлттық базаға жүктелуде...");
+    const uploaded = await uploadPdfToStorage(file, `clubs/club_${window.currentClubId}`);
+    if (!uploaded) return;
+
+    const { error } = await sb.from("documents").insert([{
+      title: docTitle,
+      category: "club_pdf",
+      doc_date: new Date().toISOString().slice(0, 10),
+      content: {
+        clubId: window.currentClubId,
+        section: window.currentClubSection || "plan",
+        docTitle,
+        fileName: file.name,
+        fileUrl: uploaded.publicUrl,
+        storagePath: uploaded.storagePath
+      }
+    }]);
+
+    if (!error) {
+      titleInp.value = "";
+      fileInp.value = "";
+      await fetchCloudPdfs();
+      await window.renderClubModalDocs();
+      showToast("PDF барлық аккаунттарға ортақ болып сақталды!");
+    }
+  };
+
+  window.renderClubModalDocs = async function () {
+    const docs = cloudPdfCache.club.filter(
+      (d) => Number(d.clubId) === Number(window.currentClubId) &&
+             (d.section || "plan") === window.currentClubSection
+    );
+    const badge = document.getElementById("club-docs-count-badge");
+    if (badge) badge.textContent = `${docs.length} құжат`;
+
+    const listEl = document.getElementById("club-docs-list");
+    if (!listEl) return;
+
+    if (docs.length === 0) {
+      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Бұл бөлімде әзірге PDF құжат жоқ.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = docs.map((d) => `
+      <div class="p-3 rounded-xl border ${window.currentViewingClubDocId === d.id ? "border-brand-teal bg-brand-cream/70" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
+        <div onclick="previewClubDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="previewClubDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
+          <button type="button" onclick="deleteClubDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </div>
+      </div>
+    `).join("");
+    lucide.createIcons();
+  };
+
+  window.previewClubDocById = function (docId) {
+    const doc = cloudPdfCache.club.find((d) => d.id === docId);
+    if (!doc || !doc.fileUrl) return;
+    window.currentViewingClubPdfUrl = doc.fileUrl;
+    window.currentViewingClubPdfDoc = doc;
+    window.currentViewingClubDocId = doc.id;
+    document.getElementById("club-pdf-viewer-title").textContent = doc.docTitle;
+    document.getElementById("club-pdf-iframe").src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
+    document.getElementById("club-pdf-empty-state").classList.add("hidden");
+    document.getElementById("club-pdf-viewer-box").classList.remove("hidden");
+    window.renderClubModalDocs();
+  };
+
+  window.deleteClubDocById = async function (docId) {
+    if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+    const doc = cloudPdfCache.club.find((d) => d.id === docId);
+    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
+    await sb.from("documents").delete().eq("id", docId);
+    if (window.currentViewingClubDocId === docId && typeof window.resetClubPdfViewer === "function") {
+      window.resetClubPdfViewer();
+    }
+    await fetchCloudPdfs();
+    await window.renderClubModalDocs();
+    showToast("PDF құжат өшірілді!");
+  };
+
+  // ==================== 2. ҚЫЗМЕТКЕРЛЕР PDF (SUPABASE STORAGE) ====================
+  function updateCloudStaffCounts() {
+    const counts = {};
+    cloudPdfCache.staff.forEach((item) => {
+      counts[item.staffId] = (counts[item.staffId] || 0) + 1;
+    });
+    window.staffDocCounts = counts;
+    if (typeof window.renderStaff === "function") window.renderStaff();
+  }
+
+  window.handleStaffPdfUpload = async function (e) {
+    e.preventDefault();
+    if (!window.currentStaffId) return;
+    const titleInp = document.getElementById("staff-doc-title");
+    const fileInp = document.getElementById("staff-doc-file");
+    const docTitle = titleInp.value.trim();
+    const file = fileInp.files[0];
+    if (!docTitle || !file) return;
+
+    showToast("Қызметкер құжаты жүктелуде...");
+    const uploaded = await uploadPdfToStorage(file, `staff/staff_${window.currentStaffId}`);
+    if (!uploaded) return;
+
+    const { error } = await sb.from("documents").insert([{
+      title: docTitle,
+      category: "staff_pdf",
+      doc_date: new Date().toISOString().slice(0, 10),
+      content: {
+        staffId: window.currentStaffId,
+        docTitle,
+        fileName: file.name,
+        fileUrl: uploaded.publicUrl,
+        storagePath: uploaded.storagePath
+      }
+    }]);
+
+    if (!error) {
+      titleInp.value = "";
+      fileInp.value = "";
+      await fetchCloudPdfs();
+      await window.renderStaffModalDocs();
+      showToast("Қызметкер құжаты ортақ базаға сақталды!");
+    }
+  };
+
+  window.renderStaffModalDocs = async function () {
+    const docs = cloudPdfCache.staff.filter(
+      (d) => Number(d.staffId) === Number(window.currentStaffId)
+    );
+    const badge = document.getElementById("staff-docs-count-badge");
+    if (badge) badge.textContent = `${docs.length} құжат`;
+
+    const listEl = document.getElementById("staff-docs-list");
+    if (!listEl) return;
+
+    if (docs.length === 0) {
+      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = docs.map((d) => `
+      <div class="p-3 rounded-xl border ${window.currentViewingDocId === d.id ? "border-brand-teal bg-brand-cream/70" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
+        <div onclick="previewStaffDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="previewStaffDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
+          <button type="button" onclick="deleteStaffDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </div>
+      </div>
+    `).join("");
+    lucide.createIcons();
+  };
+
+  window.previewStaffDocById = function (docId) {
+    const doc = cloudPdfCache.staff.find((d) => d.id === docId);
+    if (!doc || !doc.fileUrl) return;
+    window.currentViewingPdfUrl = doc.fileUrl;
+    window.currentViewingPdfDoc = doc;
+    window.currentViewingDocId = doc.id;
+    document.getElementById("staff-pdf-viewer-title").textContent = doc.docTitle;
+    document.getElementById("staff-pdf-iframe").src = doc.fileUrl;
+    document.getElementById("staff-pdf-empty-state").classList.add("hidden");
+    document.getElementById("staff-pdf-viewer-box").classList.remove("hidden");
+    window.renderStaffModalDocs();
+  };
+
+  window.deleteStaffDocById = async function (docId) {
+    if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+    const doc = cloudPdfCache.staff.find((d) => d.id === docId);
+    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
+    await sb.from("documents").delete().eq("id", docId);
+    if (window.currentViewingDocId === docId && typeof window.resetStaffPdfViewer === "function") {
+      window.resetStaffPdfViewer();
+    }
+    await fetchCloudPdfs();
+    await window.renderStaffModalDocs();
+    showToast("Құжат өшірілді!");
+  };
+
+  // ==================== 3. АҚЫЛЫ ҚЫЗМЕТ PDF (SUPABASE STORAGE) ====================
+  window.handlePaidServicePdfUpload = async function (e) {
+    e.preventDefault();
+    const titleInp = document.getElementById("paid-doc-title");
+    const fileInp = document.getElementById("paid-doc-file");
+    const docTitle = titleInp.value.trim();
+    const file = fileInp.files[0];
+    if (!docTitle || !file) return;
+
+    showToast("Альбомдық PDF бұлтқа жүктелуде...");
+    const uploaded = await uploadPdfToStorage(file, "paid_services");
+    if (!uploaded) return;
+
+    const { data, error } = await sb.from("documents").insert([{
+      title: docTitle,
+      category: "paid_pdf",
+      doc_date: new Date().toISOString().slice(0, 10),
+      content: {
+        docTitle,
+        fileName: file.name,
+        orientation: "landscape",
+        fileUrl: uploaded.publicUrl,
+        storagePath: uploaded.storagePath
+      }
+    }]).select();
+
+    if (!error) {
+      titleInp.value = "";
+      fileInp.value = "";
+      await fetchCloudPdfs();
+      if (data && data[0]) window.previewPaidDocById(data[0].id);
+      showToast("Альбомдық PDF ортақ базаға сақталды!");
+    }
+  };
+
+  window.renderPaidServiceDocs = async function () {
+    const docs = cloudPdfCache.paid;
+    const badge = document.getElementById("paid-docs-count-badge");
+    if (badge) badge.textContent = `${docs.length} құжат`;
+
+    const listEl = document.getElementById("paid-docs-list");
+    if (!listEl) return;
+
+    if (docs.length === 0) {
+      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500 bg-white">Ақылы қызмет бойынша альбомдық PDF құжаттар әзірге жоқ.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = docs.map((d) => `
+      <div class="p-3 rounded-xl border ${window.currentViewingPaidDocId === d.id ? "border-brand-teal bg-brand-cream/80" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
+        <div onclick="previewPaidDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
+          <button type="button" onclick="deletePaidDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </div>
+      </div>
+    `).join("");
+    lucide.createIcons();
+  };
+
+  window.previewPaidDocById = function (docId) {
+    const doc = cloudPdfCache.paid.find((d) => d.id === docId);
+    if (!doc || !doc.fileUrl) return;
+    window.currentViewingPaidPdfUrl = doc.fileUrl;
+    window.currentViewingPaidPdfDoc = doc;
+    window.currentViewingPaidDocId = doc.id;
+    document.getElementById("paid-pdf-viewer-title").textContent = `${doc.docTitle} (Альбомдық PDF)`;
+    document.getElementById("paid-fs-title").textContent = `${doc.docTitle} (Альбомдық PDF)`;
+    document.getElementById("paid-pdf-iframe").src = doc.fileUrl;
+    document.getElementById("paid-fs-iframe").src = doc.fileUrl;
+    document.getElementById("paid-pdf-empty-state").classList.add("hidden");
+    document.getElementById("paid-pdf-viewer-box").classList.remove("hidden");
+    window.renderPaidServiceDocs();
+  };
+
+  window.deletePaidDocById = async function (docId) {
+    if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+    const doc = cloudPdfCache.paid.find((d) => d.id === docId);
+    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
+    await sb.from("documents").delete().eq("id", docId);
+    if (window.currentViewingPaidDocId === docId && typeof window.resetPaidPdfViewer === "function") {
+      window.resetPaidPdfViewer();
+    }
+    await fetchCloudPdfs();
+    showToast("PDF құжат өшірілді!");
+  };
+
+  // Бет ашылғанда барлық PDF тізімін жүктеу
+  window.addEventListener("load", () => {
+    setTimeout(fetchCloudPdfs, 700);
+  });
+})();
+</script></body>
 </html>
 
