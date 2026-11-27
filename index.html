@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>«Жаңақұрылыс ауылдық клубы» КМҚК — Құжаттар мен Үйірмелер Базасы</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://wlqnbxuzsesbnmiaedwe.supabase.co";
-const SUPABASE_KEY = "sb_publishable_dW0gq6KoMMJF1X3peM6KqA_P_yqIsz9";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
+    <script>
+        const SUPABASE_URL = "https://wlqnbxuzsesbnmiaedwe.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_dW0gq6KoMMJF1X3peM6KqA_P_yqIsz9";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.supabaseClient = supabaseClient;
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Word (.docx) құжаттарын барлық пішімімен (түсі, шрифт, кесте, сурет, теңестіру) дәл қалпында оқу үшін docx-preview + mammoth -->
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
@@ -51,11 +51,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             60% { transform: translateX(-6px); }
             80% { transform: translateX(6px); }
         }
-        .shake-error {
-            animation: shakeError 0.35s ease-in-out;
-        }
+        .shake-error { animation: shakeError 0.35s ease-in-out; }
 
-        /* WORD СИЯҚТЫ ТІЗБЕКТЕЛГЕН АҚ ПАРАҚТАР (АСТЫНАН КЕЛЕСІ БЕТ АШЫЛАДЫ) */
         .word-pages-workspace {
             display: flex;
             flex-direction: column;
@@ -154,7 +151,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             background: #ffffff !important;
         }
 
-        /* ЕНГІЗІЛГЕН СУРЕТТІ ЖЫЛЖЫТУ ЖӘНЕ КІШІРЕЙТУ / ҮЛКЕЙТУ КОНТЕЙНЕРІ */
         .resizable-img-box {
             display: inline-block;
             position: relative;
@@ -251,9 +247,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             border-radius: 4px;
             font-weight: 800;
         }
-        .img-drag-grip:active {
-            cursor: grabbing;
-        }
 
         .mtb-landscape-sheet {
             width: 100%;
@@ -288,9 +281,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
         @media (max-width: 900px) {
-            .mtb-landscape-grid {
-                grid-template-columns: 1fr;
-            }
+            .mtb-landscape-grid { grid-template-columns: 1fr; }
         }
 
         .mtb-photo-card {
@@ -323,17 +314,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             vertical-align: middle;
         }
 
-        .mtb-sub-banner {
-            background: #e2e8f0;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .mtb-section-banner {
-            background: #cbd5e1;
-            font-weight: bold;
-            text-align: center;
-        }
+        .mtb-sub-banner { background: #e2e8f0; font-weight: bold; text-align: center; }
+        .mtb-section-banner { background: #cbd5e1; font-weight: bold; text-align: center; }
 
         .landscape-pdf-frame-wrap {
             width: 100%;
@@ -393,9 +375,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             font-size: 13.5px;
         }
 
-        #printable-area {
-            display: none;
-        }
+        #printable-area { display: none; }
 
         @media print {
             html, body {
@@ -405,9 +385,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 height: auto !important;
                 overflow: visible !important;
             }
-            body.printing-active > *:not(#printable-area) {
-                display: none !important;
-            }
+            body.printing-active > *:not(#printable-area) { display: none !important; }
             body.printing-active #printable-area {
                 display: block !important;
                 position: static !important;
@@ -447,9 +425,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 background: #ffffff !important;
                 background-image: none !important;
             }
-            .img-move-toolbar, .img-resize-handle, .no-print, .word-page-badge {
-                display: none !important;
-            }
+            .img-move-toolbar, .img-resize-handle, .no-print, .word-page-badge { display: none !important; }
             .resizable-img-box {
                 border: none !important;
                 position: static !important;
@@ -535,7 +511,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                         <i data-lucide="landmark" class="w-6 h-6 text-brand-gold"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold block">Мәдениет ошағының цифрлық порталы</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold">Мәдениет ошағының цифрлық порталы</span>
+                            <span id="cloud-sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-[10px] font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Ортақ база қосулы</span>
+                            </span>
+                        </div>
                         <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight text-white">«Жаңақұрылыс ауылдық клубы» КМҚК</h1>
                     </div>
                 </div>
@@ -560,6 +542,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     <button type="button" onclick="switchMainTab('paid-services')" data-tab="paid-services" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer text-slate-200 hover:bg-white/10">
                         <i data-lucide="banknote" class="w-4 h-4"></i>
                         <span>Ақылы қызмет</span>
+                    </button>
+                    <button type="button" onclick="syncAllFromSupabase(true)" title="Базадан жаңарту" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer bg-emerald-600/85 hover:bg-emerald-600 text-white shadow">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Жаңарту</span>
                     </button>
                     <button type="button" onclick="lockPlatform()" title="Порталды құлыптау" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer bg-rose-600/85 hover:bg-rose-600 text-white shadow">
                         <i data-lucide="lock" class="w-4 h-4"></i>
@@ -629,7 +615,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             </div>
         </section>
 
-        <!-- 4. МАТЕРИАЛДЫҚ-ТЕХНИКАЛЫҚ БАЗА (АЛЬБОМДЫҚ, ӨЗГЕРТІЛЕТІН) -->
+        <!-- 4. МАТЕРИАЛДЫҚ-ТЕХНИКАЛЫҚ БАЗА -->
         <section id="section-mtb" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-brand-gold/30 space-y-5">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -686,7 +672,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             </div>
         </section>
 
-        <!-- 5. АҚЫЛЫ ҚЫЗМЕТ (АЛЬБОМДЫҚ PDF) -->
+        <!-- 5. АҚЫЛЫ ҚЫЗМЕТ -->
         <section id="section-paid-services" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-brand-gold/30 space-y-5">
                 <div class="border-b border-slate-100 pb-4">
@@ -751,14 +737,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         </div>
     </footer>
 
-    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 1: ІС-ШАРА ҚҰЖАТТАРЫ (ТОЛЫҚ ЭКРАН) -->
+    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 1: ІС-ШАРА ҚҰЖАТТАРЫ -->
     <div id="document-modal" class="fixed inset-0 z-50 bg-slate-900/90 flex items-center justify-center p-0 hidden">
         <div class="bg-white w-screen h-screen max-w-none rounded-none border-0 overflow-hidden flex flex-col">
             <div class="bg-gradient-to-r from-brand-tealDark via-brand-teal to-brand-tealDark kazakh-pattern-bg text-white px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 border-b-2 border-brand-gold shrink-0">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 mb-0.5">
                         <span id="modal-event-date-badge" class="px-2.5 py-0.5 rounded-full bg-brand-gold text-brand-tealDark text-[11px] font-extrabold"></span>
-                        <span class="text-[11px] text-brand-gold font-semibold hidden sm:inline">Word үлгісіндегі тізбектелген A4 парақтар</span>
+                        <span class="text-[11px] text-brand-gold font-semibold hidden sm:inline">Word үлгісіндегі тізбектелген A4 парақтар (Ортақ база)</span>
                     </div>
                     <h3 id="modal-event-title" class="text-base sm:text-xl font-extrabold text-white truncate"></h3>
                 </div>
@@ -893,7 +879,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         </div>
     </div>
 
-    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 4: ҮЙІРМЕ ҚҰЖАТТАРЫ ЖӘНЕ МӘЛІМЕТТЕРІ (ТОЛЫҚ ЭКРАН) -->
+    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 4: ҮЙІРМЕ ҚҰЖАТТАРЫ -->
     <div id="club-dossier-modal" class="fixed inset-0 z-50 bg-slate-900/90 flex items-center justify-center p-0 hidden">
         <div class="bg-white w-screen h-screen max-w-none rounded-none border-0 overflow-hidden flex flex-col">
             <div class="bg-brand-teal kazakh-pattern-bg text-white px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 border-b-2 border-brand-gold shrink-0">
@@ -1026,102 +1012,27 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                                     </thead>
                                     <tbody>
                                         <tr class="plan-quarter-row"><td colspan="4">I тоқсан</td></tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">1</td>
-                                            <td>Халық күйі «Келіншек» үйірме мүшелеріне қайталу жаттығу жұмыстарын жүргізу.</td>
-                                            <td class="text-center">Қаңтар</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">2</td>
-                                            <td>«Ақжелең» күйіне дайындық жұмыстарын жүргізу.</td>
-                                            <td class="text-center">Қаңтар</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">3</td>
-                                            <td>«Туған жер алтын бесік» атты ауыл жастарының концертінде Қазанғаптың «Ақжелең» күйін үйірме мүшелеріне орындату.</td>
-                                            <td class="text-center">Ақпан</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">4</td>
-                                            <td>7 - наурыз күні «Арулар асыл жандар» атты мерекелік концертке домбырашылар ансамблін ұйымдастыру.</td>
-                                            <td class="text-center">Наурыз</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
+                                        <tr><td class="text-center font-semibold">1</td><td>Халық күйі «Келіншек» үйірме мүшелеріне қайталу жаттығу жұмыстарын жүргізу.</td><td class="text-center">Қаңтар</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">2</td><td>«Ақжелең» күйіне дайындық жұмыстарын жүргізу.</td><td class="text-center">Қаңтар</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">3</td><td>«Туған жер алтын бесік» атты ауыл жастарының концертінде Қазанғаптың «Ақжелең» күйін үйірме мүшелеріне орындату.</td><td class="text-center">Ақпан</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">4</td><td>7 - наурыз күні «Арулар асыл жандар» атты мерекелік концертке домбырашылар ансамблін ұйымдастыру.</td><td class="text-center">Наурыз</td><td class="text-center">Н.Есетов</td></tr>
 
                                         <tr class="plan-quarter-row"><td colspan="4">II тоқсан</td></tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">5</td>
-                                            <td>Дәулеткерейдің «Қосалқа» күйін жаңа сабақтан дайындау.</td>
-                                            <td class="text-center">Сәуір</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">6</td>
-                                            <td>Дәулеткерейдің «Қосалқа» күйін толығымен жатқа үйрету.</td>
-                                            <td class="text-center">Мамыр</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">7</td>
-                                            <td>Ә. Желдібаевтың «Ерке сылқым» күйін жаңа сабақтан бастау.</td>
-                                            <td class="text-center">Маусым</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">8</td>
-                                            <td>Үйірме мүшелерінің қатысуымен Ұлттық домбыра күні мерекесіне орай концерт өткізу.</td>
-                                            <td class="text-center">Маусым</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">9</td>
-                                            <td>«Таза Қазақстан - таза болашақ» атты концертке домбырашылар ансамблін дайындап, қатыстыру.</td>
-                                            <td class="text-center">//--//--//</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
+                                        <tr><td class="text-center font-semibold">5</td><td>Дәулеткерейдің «Қосалқа» күйін жаңа сабақтан дайындау.</td><td class="text-center">Сәуір</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">6</td><td>Дәулеткерейдің «Қосалқа» күйін толығымен жатқа үйрету.</td><td class="text-center">Мамыр</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">7</td><td>Ә. Желдібаевтың «Ерке сылқым» күйін жаңа сабақтан бастау.</td><td class="text-center">Маусым</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">8</td><td>Үйірме мүшелерінің қатысуымен Ұлттық домбыра күні мерекесіне орай концерт өткізу.</td><td class="text-center">Маусым</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">9</td><td>«Таза Қазақстан - таза болашақ» атты концертке домбырашылар ансамблін дайындап, қатыстыру.</td><td class="text-center">//--//--//</td><td class="text-center">Н.Есетов</td></tr>
 
                                         <tr class="plan-quarter-row"><td colspan="4">III тоқсан</td></tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">10</td>
-                                            <td>Ә. Желдібаевтың «Ерке сылқым» күйін толығымен өнерпаздарға үйрету.</td>
-                                            <td class="text-center">Шілде</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">11</td>
-                                            <td>Исламбек Ысқақовтың «Күрішшілер биі» күйіне дайындық жасау, үйрету.</td>
-                                            <td class="text-center">Тамыз</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">12</td>
-                                            <td>Ермұрат Үсеновтың «Кербез сұлу» күйімен танысу, қағыстарын үйрету.</td>
-                                            <td class="text-center">Қыркүйек</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
+                                        <tr><td class="text-center font-semibold">10</td><td>Ә. Желдібаевтың «Ерке сылқым» күйін толығымен өнерпаздарға үйрету.</td><td class="text-center">Шілде</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">11</td><td>Исламбек Ысқақовтың «Күрішшілер биі» күйіне дайындық жасау, үйрету.</td><td class="text-center">Тамыз</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">12</td><td>Ермұрат Үсеновтың «Кербез сұлу» күйімен танысу, қағыстарын үйрету.</td><td class="text-center">Қыркүйек</td><td class="text-center">Н.Есетов</td></tr>
 
                                         <tr class="plan-quarter-row"><td colspan="4">IV тоқсан</td></tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">13</td>
-                                            <td>Қазанғаптың «Құс қайтару» күйін жаңа сабақтан дайындау.</td>
-                                            <td class="text-center">Қазан</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">14</td>
-                                            <td>Қазанғаптың «Құс қайтару» күйін толығымен өнерпаздарға үйрету.</td>
-                                            <td class="text-center">Қараша</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">15</td>
-                                            <td>Жыл соңында өнерпаздардың есепті концертін өткізу.</td>
-                                            <td class="text-center">Желтоқсан</td>
-                                            <td class="text-center">Н.Есетов</td>
-                                        </tr>
+                                        <tr><td class="text-center font-semibold">13</td><td>Қазанғаптың «Құс қайтару» күйін жаңа сабақтан дайындық жасау.</td><td class="text-center">Қазан</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">14</td><td>Қазанғаптың «Құс қайтару» күйін толығымен өнерпаздарға үйрету.</td><td class="text-center">Қараша</td><td class="text-center">Н.Есетов</td></tr>
+                                        <tr><td class="text-center font-semibold">15</td><td>Жыл соңында өнерпаздардың есепті концертін өткізу.</td><td class="text-center">Желтоқсан</td><td class="text-center">Н.Есетов</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1166,116 +1077,17 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="text-center font-semibold">1</td>
-                                            <td>Нұрланқызы Інжу</td>
-                                            <td class="text-center">10.08.2011ж</td>
-                                            <td class="text-center">15</td>
-                                            <td class="text-center">9 сынып</td>
-                                            <td class="text-center">110810603278</td>
-                                            <td>Ақтілеуова Гүлжайна</td>
-                                            <td class="text-center whitespace-nowrap">+7 7783317276</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">2</td>
-                                            <td>Жолдыбайұлы Рафиль</td>
-                                            <td class="text-center">30.07.2013ж</td>
-                                            <td class="text-center">14</td>
-                                            <td class="text-center">8-сынып</td>
-                                            <td class="text-center">130730503270</td>
-                                            <td>Демесбаева Айнұр</td>
-                                            <td class="text-center whitespace-nowrap">+7 7788521718</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">3</td>
-                                            <td>Қасенұлы Мәди</td>
-                                            <td class="text-center">02.05.2014ж</td>
-                                            <td class="text-center">13</td>
-                                            <td class="text-center">7 сынып</td>
-                                            <td class="text-center">140502503996</td>
-                                            <td>Әбдікерова Бағила</td>
-                                            <td class="text-center whitespace-nowrap">+7 7759093375</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">4</td>
-                                            <td>Айәсем Русланқызы</td>
-                                            <td class="text-center">26.06.2014ж</td>
-                                            <td class="text-center">13</td>
-                                            <td class="text-center">7 сынып</td>
-                                            <td class="text-center">140626605537</td>
-                                            <td>Ормаханова Зира</td>
-                                            <td class="text-center whitespace-nowrap">+7 7754899117</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">5</td>
-                                            <td>Айболатқызы Ару</td>
-                                            <td class="text-center">25.08.2014ж</td>
-                                            <td class="text-center">13</td>
-                                            <td class="text-center">7 сынып</td>
-                                            <td class="text-center">140825605698</td>
-                                            <td>Қалешова Жазира</td>
-                                            <td class="text-center whitespace-nowrap">+7 7782867177</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">6</td>
-                                            <td>Сағидулла Нұрперзент</td>
-                                            <td class="text-center">10.08.2014ж</td>
-                                            <td class="text-center">13</td>
-                                            <td class="text-center">7 сынып</td>
-                                            <td class="text-center">140810502135</td>
-                                            <td>Төлегенов Сағидулла</td>
-                                            <td class="text-center whitespace-nowrap">+7 7014748814</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">7</td>
-                                            <td>Әлиасқаров Айқын</td>
-                                            <td class="text-center">26.01.2015ж</td>
-                                            <td class="text-center">12</td>
-                                            <td class="text-center">6 сынып</td>
-                                            <td class="text-center">150126503319</td>
-                                            <td>Махамбетова Ләззат</td>
-                                            <td class="text-center whitespace-nowrap">+7 7053640706</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">8</td>
-                                            <td>Берікжанұлы Кемеңгер</td>
-                                            <td class="text-center">24.05.2015ж</td>
-                                            <td class="text-center">12</td>
-                                            <td class="text-center">6 сынып</td>
-                                            <td class="text-center">150524504301</td>
-                                            <td>Нөкешов Берікжан</td>
-                                            <td class="text-center whitespace-nowrap">+7 7753959023</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">9</td>
-                                            <td>Әзілханұлы Ғаділбек</td>
-                                            <td class="text-center">18.12.2016ж</td>
-                                            <td class="text-center">11</td>
-                                            <td class="text-center">5 сынып</td>
-                                            <td class="text-center">161218500191</td>
-                                            <td>Сансызбаева Рыскүл</td>
-                                            <td class="text-center whitespace-nowrap">+7 7021798488</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">10</td>
-                                            <td>Ғалымұлы Нұрәлі</td>
-                                            <td class="text-center">17.06.2016ж</td>
-                                            <td class="text-center">11</td>
-                                            <td class="text-center">5 сынып</td>
-                                            <td class="text-center">160617505367</td>
-                                            <td>Шалбаев Ғалым</td>
-                                            <td class="text-center whitespace-nowrap">+7 7012298606</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center font-semibold">11</td>
-                                            <td>Әлиханов Ислам</td>
-                                            <td class="text-center">06.06.2017ж</td>
-                                            <td class="text-center">10</td>
-                                            <td class="text-center">4 сынып</td>
-                                            <td class="text-center">170606501138</td>
-                                            <td>Базарбаев Мейрімжан</td>
-                                            <td class="text-center whitespace-nowrap">+7 7786431589</td>
-                                        </tr>
+                                        <tr><td class="text-center font-semibold">1</td><td>Нұрланқызы Інжу</td><td class="text-center">10.08.2011ж</td><td class="text-center">15</td><td class="text-center">9 сынып</td><td class="text-center">110810603278</td><td>Ақтілеуова Гүлжайна</td><td class="text-center whitespace-nowrap">+7 7783317276</td></tr>
+                                        <tr><td class="text-center font-semibold">2</td><td>Жолдыбайұлы Рафиль</td><td class="text-center">30.07.2013ж</td><td class="text-center">14</td><td class="text-center">8-сынып</td><td class="text-center">130730503270</td><td>Демесбаева Айнұр</td><td class="text-center whitespace-nowrap">+7 7788521718</td></tr>
+                                        <tr><td class="text-center font-semibold">3</td><td>Қасенұлы Мәди</td><td class="text-center">02.05.2014ж</td><td class="text-center">13</td><td class="text-center">7 сынып</td><td class="text-center">140502503996</td><td>Әбдікерова Бағила</td><td class="text-center whitespace-nowrap">+7 7759093375</td></tr>
+                                        <tr><td class="text-center font-semibold">4</td><td>Айәсем Русланқызы</td><td class="text-center">26.06.2014ж</td><td class="text-center">13</td><td class="text-center">7 сынып</td><td class="text-center">140626605537</td><td>Ормаханова Зира</td><td class="text-center whitespace-nowrap">+7 7754899117</td></tr>
+                                        <tr><td class="text-center font-semibold">5</td><td>Айболатқызы Ару</td><td class="text-center">25.08.2014ж</td><td class="text-center">13</td><td class="text-center">7 сынып</td><td class="text-center">140825605698</td><td>Қалешова Жазира</td><td class="text-center whitespace-nowrap">+7 7782867177</td></tr>
+                                        <tr><td class="text-center font-semibold">6</td><td>Сағидулла Нұрперзент</td><td class="text-center">10.08.2014ж</td><td class="text-center">13</td><td class="text-center">7 сынып</td><td class="text-center">140810502135</td><td>Төлегенов Сағидулла</td><td class="text-center whitespace-nowrap">+7 7014748814</td></tr>
+                                        <tr><td class="text-center font-semibold">7</td><td>Әлиасқаров Айқын</td><td class="text-center">26.01.2015ж</td><td class="text-center">12</td><td class="text-center">6 сынып</td><td class="text-center">150126503319</td><td>Махамбетова Ләззат</td><td class="text-center whitespace-nowrap">+7 7053640706</td></tr>
+                                        <tr><td class="text-center font-semibold">8</td><td>Берікжанұлы Кемеңгер</td><td class="text-center">24.05.2015ж</td><td class="text-center">12</td><td class="text-center">6 сынып</td><td class="text-center">150524504301</td><td>Нөкешов Берікжан</td><td class="text-center whitespace-nowrap">+7 7753959023</td></tr>
+                                        <tr><td class="text-center font-semibold">9</td><td>Әзілханұлы Ғаділбек</td><td class="text-center">18.12.2016ж</td><td class="text-center">11</td><td class="text-center">5 сынып</td><td class="text-center">161218500191</td><td>Сансызбаева Рыскүл</td><td class="text-center whitespace-nowrap">+7 7021798488</td></tr>
+                                        <tr><td class="text-center font-semibold">10</td><td>Ғалымұлы Нұрәлі</td><td class="text-center">17.06.2016ж</td><td class="text-center">11</td><td class="text-center">5 сынып</td><td class="text-center">160617505367</td><td>Шалбаев Ғалым</td><td class="text-center whitespace-nowrap">+7 7012298606</td></tr>
+                                        <tr><td class="text-center font-semibold">11</td><td>Әлиханов Ислам</td><td class="text-center">06.06.2017ж</td><td class="text-center">10</td><td class="text-center">4 сынып</td><td class="text-center">170606501138</td><td>Базарбаев Мейрімжан</td><td class="text-center whitespace-nowrap">+7 7786431589</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1346,7 +1158,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         </div>
     </div>
 
-    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 5: ҚЫЗМЕТКЕРДІҢ ЖЕКЕ ІС ҚАҒАЗДАРЫ (ТОЛЫҚ ЭКРАН) -->
+    <!-- МОДАЛЬДЫ ТЕРЕЗЕ 5: ҚЫЗМЕТКЕРДІҢ ЖЕКЕ ІС ҚАҒАЗДАРЫ -->
     <div id="staff-dossier-modal" class="fixed inset-0 z-50 bg-slate-900/90 flex items-center justify-center p-0 hidden">
         <div class="bg-white w-screen h-screen max-w-none rounded-none border-0 overflow-hidden flex flex-col">
             <div class="bg-brand-teal kazakh-pattern-bg text-white px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 border-b-2 border-brand-gold shrink-0">
@@ -1435,8 +1247,11 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
+    <!-- НЕГІЗГІ БІРТҰТАС JAVASCRIPT (SUPABASE ОРТАҚ БАЗАСЫМЕН ТОЛЫҚ СИНХРОНДАЛҒАН) -->
     <script>
+        const sb = window.supabaseClient;
+        const BUCKET_NAME = "club-files";
+
         // ==================== ҚҰПИЯСӨЗБЕН ҚҰЛЫПТАУ ЖҮЙЕСІ (1984@) ====================
         const PLATFORM_PASS = '1984@';
         const AUTH_SESSION_KEY = 'zhanakurylys_portal_unlocked_v1';
@@ -1496,10 +1311,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
             lucide.createIcons();
         }
-
-        const EVENTS_DB_NAME = 'ZhanakurylysCleanDocsDB_v2';
-        const EVENTS_STORE_NAME = 'events_store';
-        let eventsDb = null;
 
         const QUARTERS_META = [
             { id: 1, name: 'I Тоқсан', subtitle: 'Қаңтар • Ақпан • Наурыз', months: ['Қаңтар', 'Ақпан', 'Наурыз'] },
@@ -1563,7 +1374,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                             </tr>
                             <tr><td colspan="2" class="mtb-sub-banner">Қызметкерлер жайлы мәлімет</td></tr>
                             <tr><td class="text-center font-semibold">Барлық штат саны - 5</td><td class="text-center font-semibold">Нақты жұмыс істейтін қызметкер - 6 (қосымша/уақытша жүктемені ескергенде)</td></tr>
-                            <tr><td style="font-weight:bold;">Мәдениет қызметкерлерінің саны - 3</td><td>Басшы - 1, әдіскер - 1, сүйемелдеуші - 1</td></tr>
+                            <tr><td style="font-weight:bold;">Мәдениет қызметкерлерілерінің саны - 3</td><td>Басшы - 1, әдіскер - 1, сүйемелдеуші - 1</td></tr>
                             <tr><td style="font-weight:bold;">Шаруашылық қызметкерлер саны - 2</td><td>Есепші – 1, еден жуушы – 1</td></tr>
                             <tr><td colspan="2" class="mtb-section-banner">Материалдық-техникалық базасы</td></tr>
                             <tr><td style="font-weight:bold;">Сахна киімдері жиынтығының саны</td><td>0</td></tr>
@@ -1594,7 +1405,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             { id: 14, quarter: 2, month: 'Мамыр', title: '«7 мамыр - Отан қорғаушылар күні» және «9 мамыр – Жеңіс күні» мерекесіне орай «Жеңістің туы шарықта» атты ардагерлермен кездесу кеш', date: '08.05.2026', time: '15:00' },
             { id: 15, quarter: 2, month: 'Мамыр', title: 'Ақын Күләш Ахметованың 80 жылдығына орай «Жарық дүние» атты әдеби әуенді кеш', date: '22.05.2026', time: '15:00' },
             { id: 16, quarter: 2, month: 'Маусым', title: '«1 Маусым Халықаралық Балаларды қорғау күні» мерекесіне орай «Бақытты балалық шақ» мерекелік концерт', date: '01.06.2026', time: '11:00' },
-            { id: 17, quarter: 2, month: 'Маусым', title: '«4 маусым - Рәміздер күні» мерекесіне орай «Рәміздер мақтанышым» атты танымдық кеш', date: '04.06.2026', time: '12:00' },
+            { id: 17, quarter: 2, month: 'Маусым', title: '«4 маум - Рәміздер күні» мерекесіне орай «Рәміздер мақтанышым» атты танымдық кеш', date: '04.06.2026', time: '12:00' },
             { id: 18, quarter: 3, month: 'Шілде', title: 'Күйші, композитор Құрманғазы Сағырбайұлының туғанына 220 жыл толуына орай «Күй атасы - Құрманғазы» атты тақырыптық кеш', date: '03.07.2026', time: '16:00' },
             { id: 19, quarter: 3, month: 'Шілде', title: '«6 - шілде Астана күні» мерекесіне орай «Астана – арман қала» атты концерт', date: '06.07.2026', time: '16:00' },
             { id: 20, quarter: 3, month: 'Шілде', title: 'Діни экстремизмнің алдын-алу мақсатында «Имандылық әр адамның жүрегінде» атты дөңгелек үстел', date: '24.07.2026', time: '15:00' },
@@ -1636,8 +1447,201 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let uploadTargetSection = null;
         let activeRichSection = null;
         let savedSelectionRange = null;
+        let currentMtbHtml = DEFAULT_MTB_LANDSCAPE_HTML;
+        let currentMtbRowId = null;
 
-        // ==================== ҚАУІПСІЗ HTML ТАЗАРТУ (WORD ПІШІМІН САҚТАЙ ОТЫРЫП) ====================
+        // Supabase Cloud PDF тізімі
+        let cloudPdfCache = { club: [], staff: [], paid: [] };
+        let clubDocCounts = {};
+        let staffDocCounts = {};
+
+        // ==================== SUPABASE STORAGE ЖӘНЕ ОРТАҚ БАЗА ФУНКЦИЯЛАРЫ ====================
+        async function uploadFileToStorage(file, folder, forcedExt = null) {
+            const ext = forcedExt || (file.name.split('.').pop() || 'bin').toLowerCase();
+            const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
+            const filePath = `${folder}/${safeName}`;
+
+            const { error: uploadError } = await sb.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, file, {
+                    contentType: file.type || 'application/octet-stream',
+                    upsert: false
+                });
+
+            if (uploadError) {
+                console.error("Storage жүктеу қатесі:", uploadError);
+                showToast("Файлды ортақ бұлтқа жүктеу қатесі: " + uploadError.message);
+                return null;
+            }
+
+            const { data } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+            return {
+                publicUrl: data.publicUrl,
+                storagePath: filePath
+            };
+        }
+
+        async function deleteFileFromStorage(storagePath) {
+            if (!storagePath) return;
+            await sb.storage.from(BUCKET_NAME).remove([storagePath]);
+        }
+
+        function serializeEventForCloud(ev) {
+            const copy = { ...ev };
+            delete copy.rawDocxBuffers;
+            delete copy._supaRowId;
+            return copy;
+        }
+
+        async function saveEventToSupabase(ev) {
+            if (!sb || !ev) return;
+            const cleanObj = serializeEventForCloud(ev);
+            const payload = {
+                title: ev.title,
+                category: 'annual_event',
+                doc_date: ev.date || new Date().toISOString().slice(0, 10),
+                content: cleanObj
+            };
+
+            if (ev._supaRowId) {
+                const { error } = await sb
+                    .from('documents')
+                    .update(payload)
+                    .eq('id', ev._supaRowId);
+                if (error) console.error("Іс-шараны жаңарту қатесі:", error);
+            } else {
+                const { data, error } = await sb
+                    .from('documents')
+                    .insert([payload])
+                    .select();
+                if (!error && data && data[0]) {
+                    ev._supaRowId = data[0].id;
+                } else if (error) {
+                    console.error("Іс-шараны сақтау қатесі:", error);
+                }
+            }
+        }
+
+        async function saveMtbPassportToSupabase(html) {
+            currentMtbHtml = html;
+            if (!sb) return;
+            const payload = {
+                title: 'МТБ - Негізгі паспорт',
+                category: 'mtb_passport',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: { html }
+            };
+
+            if (currentMtbRowId) {
+                const { error } = await sb
+                    .from('documents')
+                    .update(payload)
+                    .eq('id', currentMtbRowId);
+                if (error) console.error("МТБ жаңарту қатесі:", error);
+            } else {
+                const { data, error } = await sb
+                    .from('documents')
+                    .insert([payload])
+                    .select();
+                if (!error && data && data[0]) {
+                    currentMtbRowId = data[0].id;
+                } else if (error) {
+                    console.error("МТБ сақтау қатесі:", error);
+                }
+            }
+        }
+
+        async function syncAllFromSupabase(showNotify = false) {
+            if (!sb) return;
+            try {
+                const { data, error } = await sb
+                    .from('documents')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (error) {
+                    console.error("Supabase оқу қатесі:", error);
+                    if (showNotify) showToast("Ортақ базамен байланысу қатесі!");
+                    return;
+                }
+
+                const rows = data || [];
+
+                // 1. Бастапқы 34 іс-шараны дайындау және Supabase-тегі жазбалармен біріктіру
+                const mergedMap = new Map();
+                DEFAULT_EVENTS.forEach(defEv => {
+                    mergedMap.set(Number(defEv.id), { ...defEv, originalTitle: defEv.title });
+                });
+
+                const eventRows = rows.filter(r => r.category === 'annual_event');
+                eventRows.forEach(row => {
+                    const c = row.content || {};
+                    const evId = Number(c.id);
+                    if (evId) {
+                        const existing = mergedMap.get(evId) || {};
+                        mergedMap.set(evId, {
+                            ...existing,
+                            ...c,
+                            id: evId,
+                            _supaRowId: row.id
+                        });
+                    }
+                });
+
+                eventsData = Array.from(mergedMap.values()).sort((a, b) => a.id - b.id);
+
+                // 2. МТБ паспортын жүктеу (ең соңғы жазба)
+                const mtbRows = rows.filter(r => r.category === 'mtb_passport');
+                if (mtbRows.length > 0) {
+                    const latestMtb = mtbRows[mtbRows.length - 1];
+                    currentMtbRowId = latestMtb.id;
+                    if (latestMtb.content && latestMtb.content.html) {
+                        currentMtbHtml = latestMtb.content.html;
+                    }
+                }
+
+                // 3. Үйірме, Қызметкер, Ақылы қызмет PDF-терін жүктеу
+                cloudPdfCache = { club: [], staff: [], paid: [] };
+                rows.slice().reverse().forEach(row => {
+                    const item = {
+                        id: row.id,
+                        ...(row.content || {}),
+                        docTitle: row.title
+                    };
+                    if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
+                    if (row.category === 'staff_pdf') cloudPdfCache.staff.push(item);
+                    if (row.category === 'paid_pdf') cloudPdfCache.paid.push(item);
+                });
+
+                updateCloudClubCounts();
+                updateCloudStaffCounts();
+                renderQuartersSelector();
+                const searchVal = (document.getElementById('global-search')?.value || '').toLowerCase().trim();
+                if (searchVal) {
+                    renderSearchResults(searchVal);
+                } else {
+                    renderQuarterMonths(activeQuarter);
+                }
+                renderMtbMainView();
+                renderPaidServiceDocs();
+
+                if (currentEventId) {
+                    const activeEv = eventsData.find(e => e.id === currentEventId);
+                    if (activeEv) {
+                        await renderSingleCleanSection(activeEv, currentDocTab);
+                        updateTabDots(activeEv);
+                    }
+                }
+
+                if (showNotify) {
+                    showToast("Барлық құжаттар ортақ базадан сәтті жаңартылды!");
+                }
+            } catch (err) {
+                console.error("Синхрондау қатесі:", err);
+            }
+        }
+
+        // ==================== ҚАУІПСІЗ HTML ТАЗАРТУ ====================
         function sanitizeRichHtml(htmlOrText) {
             if (!htmlOrText) return '';
             const raw = String(htmlOrText);
@@ -1656,12 +1660,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 Array.from(el.attributes).forEach(attr => {
                     const name = attr.name.toLowerCase();
                     const val = (attr.value || '').trim().toLowerCase();
-                    if (name.startsWith('on')) {
-                        el.removeAttribute(attr.name);
-                    }
-                    if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) {
-                        el.removeAttribute(attr.name);
-                    }
+                    if (name.startsWith('on')) el.removeAttribute(attr.name);
+                    if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) el.removeAttribute(attr.name);
                 });
                 if (el.tagName === 'IMG') {
                     const src = (el.getAttribute('src') || '').trim();
@@ -1673,7 +1673,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             return template.innerHTML;
         }
 
-        // ==================== СУРЕТТЕРДІ ЖЫЛЖЫТУ ЖӘНЕ КІШІРЕЙТУ / ҮЛКЕЙТУ ЖҮЙЕСІ ====================
+        // ==================== СУРЕТТЕРДІ ЖЫЛЖЫТУ ЖӘНЕ КІШІРЕЙТУ / ҮЛКЕЙТУ ====================
         function createResizableImageWrapper(imgSrc, widthPx = 360) {
             const box = document.createElement('div');
             box.className = 'resizable-img-box';
@@ -1716,13 +1716,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.addEventListener('mousedown', (e) => {
             const editorArea = e.target.closest('.rich-editor-area');
-
             if (!e.target.closest('.resizable-img-box')) {
                 document.querySelectorAll('.resizable-img-box.selected').forEach(b => b.classList.remove('selected'));
             }
-
             if (!editorArea) return;
-
             const box = e.target.closest('.resizable-img-box');
             if (!box) return;
 
@@ -1734,26 +1731,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             if (actionBtn) {
                 const act = actionBtn.dataset.imgAction;
                 const curWidth = box.offsetWidth || 300;
-                if (act === 'smaller') {
-                    box.style.width = `${Math.max(60, Math.round(curWidth * 0.88))}px`;
-                } else if (act === 'larger') {
+                if (act === 'smaller') box.style.width = `${Math.max(60, Math.round(curWidth * 0.88))}px`;
+                else if (act === 'larger') {
                     const maxW = editorArea.clientWidth || 680;
                     box.style.width = `${Math.min(maxW, Math.round(curWidth * 1.14))}px`;
                 } else if (act === 'left') {
-                    box.style.display = 'block';
-                    box.style.marginLeft = '0';
-                    box.style.marginRight = 'auto';
-                    box.style.transform = '';
+                    box.style.display = 'block'; box.style.marginLeft = '0'; box.style.marginRight = 'auto';
                 } else if (act === 'center') {
-                    box.style.display = 'block';
-                    box.style.marginLeft = 'auto';
-                    box.style.marginRight = 'auto';
-                    box.style.transform = '';
+                    box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto';
                 } else if (act === 'right') {
-                    box.style.display = 'block';
-                    box.style.marginLeft = 'auto';
-                    box.style.marginRight = '0';
-                    box.style.transform = '';
+                    box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = '0';
                 } else if (act === 'delete') {
                     box.remove();
                 }
@@ -1762,34 +1749,18 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             const handle = e.target.closest('.img-resize-handle');
             if (handle) {
-                activeDragState = {
-                    mode: 'resize',
-                    dir: handle.dataset.dir,
-                    box,
-                    editorArea,
-                    startX: e.clientX,
-                    startWidth: box.offsetWidth
-                };
+                activeDragState = { mode: 'resize', dir: handle.dataset.dir, box, editorArea, startX: e.clientX, startWidth: box.offsetWidth };
                 return;
             }
 
             const currentLeft = parseFloat(box.dataset.offsetX || '0') || 0;
             const currentTop = parseFloat(box.dataset.offsetY || '0') || 0;
-            activeDragState = {
-                mode: 'move',
-                box,
-                editorArea,
-                startX: e.clientX,
-                startY: e.clientY,
-                origX: currentLeft,
-                origY: currentTop
-            };
+            activeDragState = { mode: 'move', box, editorArea, startX: e.clientX, startY: e.clientY, origX: currentLeft, origY: currentTop };
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!activeDragState) return;
             e.preventDefault();
-
             if (activeDragState.mode === 'resize') {
                 const dx = e.clientX - activeDragState.startX;
                 const factor = (activeDragState.dir === 'nw' || activeDragState.dir === 'sw') ? -1 : 1;
@@ -1809,76 +1780,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
         });
 
-        document.addEventListener('mouseup', () => {
-            if (activeDragState) {
-                activeDragState = null;
-            }
-        });
-
-        // ==================== INDEXEDDB ДЕРЕКҚОРЛАРЫ ====================
-        function initEventsDatabase() {
-            return new Promise((resolve) => {
-                const req = indexedDB.open(EVENTS_DB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(EVENTS_STORE_NAME)) {
-                        db.createObjectStore(EVENTS_STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-                req.onsuccess = (e) => {
-                    eventsDb = e.target.result;
-                    loadEventsFromDb().then(resolve);
-                };
-                req.onerror = () => {
-                    eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
-                    resolve();
-                };
-            });
-        }
-
-        function loadEventsFromDb() {
-            return new Promise((resolve) => {
-                if (!eventsDb) return resolve();
-                const tx = eventsDb.transaction(EVENTS_STORE_NAME, 'readonly');
-                const req = tx.objectStore(EVENTS_STORE_NAME).getAll();
-                req.onsuccess = () => {
-                    const rows = req.result || [];
-                    if (rows.length > 0) {
-                        eventsData = rows.sort((a, b) => a.id - b.id).map(ev => ({ ...ev, originalTitle: ev.originalTitle || ev.title }));
-                        resolve();
-                    } else {
-                        eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
-                        saveAllEventsToDb().then(resolve);
-                    }
-                };
-                req.onerror = () => {
-                    eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
-                    resolve();
-                };
-            });
-        }
-
-        function saveSingleEventToDb(ev) {
-            return new Promise((resolve) => {
-                if (!eventsDb) return resolve();
-                const tx = eventsDb.transaction(EVENTS_STORE_NAME, 'readwrite');
-                tx.objectStore(EVENTS_STORE_NAME).put(ev);
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => resolve();
-            });
-        }
-
-        function saveAllEventsToDb() {
-            return new Promise((resolve) => {
-                if (!eventsDb) return resolve();
-                const tx = eventsDb.transaction(EVENTS_STORE_NAME, 'readwrite');
-                const store = tx.objectStore(EVENTS_STORE_NAME);
-                store.clear();
-                eventsData.forEach(ev => store.put(ev));
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => resolve();
-            });
-        }
+        document.addEventListener('mouseup', () => { if (activeDragState) activeDragState = null; });
 
         // ==================== WORD СИЯҚТЫ ТІЗБЕКТЕЛГЕН АҚ ПАРАҚТАР UI ====================
         function buildCleanWordSectionsDOM() {
@@ -1919,7 +1821,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                             </div>
                             <h4 class="text-base font-extrabold text-slate-800">«${sec.label}» парағы әзірге бос</h4>
                             <p class="text-xs sm:text-sm text-slate-500 max-w-md mt-1 mb-5">
-                                Компьютерде Word арқылы дайындаған <strong>.docx</strong> файлыңызды жүктесеңіз, ішіндегі барлық мәтін, кесте, шрифт және суреттер өзгеріссіз күйінде түседі.
+                                Компьютерде Word арқылы дайындаған <strong>.docx</strong> файлыңызды жүктесеңіз немесе қолмен жазсаңыз, ол ортақ базаға сақталып, кез келген компьютерден көрінеді.
                             </p>
                             <div class="flex flex-wrap items-center justify-center gap-2.5">
                                 <button type="button" onclick="triggerUploadDocFromPC('${sec.key}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow cursor-pointer">
@@ -1942,11 +1844,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Word</span>
                             </div>
                             <div id="toolbar-slot-${sec.key}"></div>
-                            <div class="bg-brand-cream/80 border border-brand-gold/50 rounded-xl p-2.5 text-[11px] text-slate-700 space-y-1">
-                                <div class="font-extrabold text-brand-teal">Кеңес:</div>
-                                <div>• <strong>«+ Жаңа бет қосу»</strong> батырмасы арқылы астынан жаңа А4 парақ ашылады.</div>
-                                <div>• Суретті басып, бұрышынан кішірейтуге немесе ұстап жылжытуға болады.</div>
-                            </div>
                             <div class="pt-2 border-t border-slate-200 grid grid-cols-2 gap-2">
                                 <button type="button" onclick="cancelSectionEdit('${sec.key}')" class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 cursor-pointer">Бас тарту</button>
                                 <button type="button" onclick="saveSectionEdit('${sec.key}')" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer flex items-center justify-center gap-1">
@@ -2106,9 +2003,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             window.addEventListener('afterprint', cleanupPrint);
 
             requestAnimationFrame(() => {
-                setTimeout(() => {
-                    window.print();
-                }, 120);
+                setTimeout(() => { window.print(); }, 120);
             });
         }
 
@@ -2161,19 +2056,27 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             try {
                 if (ext === 'docx') {
+                    showToast("Word құжаты ортақ базаға жүктелуде...");
                     const arrayBuffer = await file.arrayBuffer();
 
                     if (!ev.rawDocxBuffers) ev.rawDocxBuffers = {};
                     ev.rawDocxBuffers[secKey] = arrayBuffer;
+
+                    // .docx файлын бұлттық Storage-ке жүктеу (басқа компьютерлер үшін)
+                    const uploaded = await uploadFileToStorage(file, `events/event_${ev.id}/${secKey}`, 'docx');
+                    if (uploaded) {
+                        if (!ev.docxUrls) ev.docxUrls = {};
+                        if (!ev.docxStoragePaths) ev.docxStoragePaths = {};
+                        ev.docxUrls[secKey] = uploaded.publicUrl;
+                        ev.docxStoragePaths[secKey] = uploaded.storagePath;
+                    }
 
                     const result = await mammoth.convertToHtml(
                         { arrayBuffer: arrayBuffer },
                         {
                             convertImage: mammoth.images.imgElement(function(image) {
                                 return image.read("base64").then(function(imageBuffer) {
-                                    return {
-                                        src: "data:" + image.contentType + ";base64," + imageBuffer
-                                    };
+                                    return { src: "data:" + image.contentType + ";base64," + imageBuffer };
                                 });
                             })
                         }
@@ -2184,27 +2087,32 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     if (!ev.fileNames) ev.fileNames = {};
                     ev.fileNames[secKey] = fileName;
 
-                    await saveSingleEventToDb(ev);
+                    await saveEventToSupabase(ev);
                     await renderSingleCleanSection(ev, secKey);
                     switchDocTab(secKey);
                     updateTabDots(ev);
-                    showToast(`«${fileName}» құжаты өзгеріссіз қалпында жүктелді!`);
+                    renderQuartersSelector();
+                    renderQuarterMonths(activeQuarter);
+                    showToast(`«${fileName}» ортақ базаға сәтті сақталды!`);
                 } else if (ext === 'txt' || ext === 'rtf') {
                     const text = await file.text();
                     const html = sanitizeRichHtml(text);
                     if (ev.rawDocxBuffers) delete ev.rawDocxBuffers[secKey];
+                    if (ev.docxUrls) delete ev.docxUrls[secKey];
                     ev[secKey] = html;
                     ev[`${secKey}_pages`] = [html];
                     if (!ev.fileNames) ev.fileNames = {};
                     ev.fileNames[secKey] = fileName;
 
-                    await saveSingleEventToDb(ev);
+                    await saveEventToSupabase(ev);
                     await renderSingleCleanSection(ev, secKey);
                     switchDocTab(secKey);
                     updateTabDots(ev);
-                    showToast(`«${fileName}» файлы жүктелді!`);
+                    renderQuartersSelector();
+                    renderQuarterMonths(activeQuarter);
+                    showToast(`«${fileName}» ортақ базаға сақталды!`);
                 } else if (ext === 'doc') {
-                    showToast("Ескі .doc форматы екен. Word-та «Сақтау -> .docx» етіп сақтап жүктесеңіз, дәл қалпында ашылады!");
+                    showToast("Ескі .doc форматы екен. Word-та «Сақтау -> .docx» етіп сақтап жүктеңіз!");
                 } else if (ext === 'pdf') {
                     const url = URL.createObjectURL(file);
                     window.open(url, '_blank');
@@ -2213,12 +2121,27 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Файлды оқу кезінде қате шықты. Құжатты .docx форматында жүктеп көріңіз.");
+                showToast("Файлды оқу кезінде қате шықты.");
             }
         }
 
         async function renderSingleCleanSection(ev, secKey) {
-            const rawDocxBuffer = ev.rawDocxBuffers && ev.rawDocxBuffers[secKey];
+            let rawDocxBuffer = ev.rawDocxBuffers && ev.rawDocxBuffers[secKey];
+
+            // Егер басқа компьютерден кірсе, бұлттағы .docx сілтемесінен жүктеп алу
+            if (!rawDocxBuffer && ev.docxUrls && ev.docxUrls[secKey]) {
+                try {
+                    const resp = await fetch(ev.docxUrls[secKey]);
+                    if (resp.ok) {
+                        rawDocxBuffer = await resp.arrayBuffer();
+                        if (!ev.rawDocxBuffers) ev.rawDocxBuffers = {};
+                        ev.rawDocxBuffers[secKey] = rawDocxBuffer;
+                    }
+                } catch (fetchErr) {
+                    console.warn("Docx бұлттан жүктелмеді, HTML нұсқасы көрсетіледі:", fetchErr);
+                }
+            }
+
             const pagesArr = Array.isArray(ev[`${secKey}_pages`]) && ev[`${secKey}_pages`].length > 0
                 ? ev[`${secKey}_pages`]
                 : (ev[secKey] ? [ev[secKey]] : []);
@@ -2297,22 +2220,31 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         async function clearCleanSection(secKey) {
             const ev = eventsData.find(item => item.id === currentEventId);
             if (!ev) return;
+            if (ev.docxStoragePaths && ev.docxStoragePaths[secKey]) {
+                await deleteFileFromStorage(ev.docxStoragePaths[secKey]);
+                delete ev.docxStoragePaths[secKey];
+            }
+            if (ev.docxUrls) delete ev.docxUrls[secKey];
             ev[secKey] = '';
             delete ev[`${secKey}_pages`];
             if (ev.rawDocxBuffers) delete ev.rawDocxBuffers[secKey];
             if (ev.fileNames) delete ev.fileNames[secKey];
 
-            await saveSingleEventToDb(ev);
+            await saveEventToSupabase(ev);
             await renderSingleCleanSection(ev, secKey);
             updateTabDots(ev);
-            showToast("Парақ тазартылды!");
+            renderQuartersSelector();
+            renderQuarterMonths(activeQuarter);
+            showToast("Парақ ортақ базадан тазартылды!");
         }
 
         function updateTabDots(ev) {
             CLEAN_SECTIONS.forEach(sec => {
                 const dot = document.getElementById(`dot-${sec.key}`);
                 if (!dot) return;
-                const hasData = Boolean(ev.rawDocxBuffers && ev.rawDocxBuffers[sec.key]) || (ev[sec.key] && ev[sec.key].trim().length > 0);
+                const hasData = Boolean(ev.rawDocxBuffers && ev.rawDocxBuffers[sec.key]) ||
+                                Boolean(ev.docxUrls && ev.docxUrls[sec.key]) ||
+                                (ev[sec.key] && ev[sec.key].trim().length > 0);
                 dot.classList.toggle('hidden', !hasData);
             });
         }
@@ -2325,13 +2257,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             document.getElementById('modal-event-title').textContent = ev.title;
             document.getElementById('modal-event-date-badge').textContent = `${ev.date} • ${ev.time}`;
 
-            for (const sec of CLEAN_SECTIONS) {
-                await renderSingleCleanSection(ev, sec.key);
-            }
             updateTabDots(ev);
-
             switchDocTab(defaultTab);
             document.getElementById('document-modal').classList.remove('hidden');
+            await renderSingleCleanSection(ev, defaultTab);
             lucide.createIcons();
         }
 
@@ -2340,7 +2269,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             currentEventId = null;
         }
 
-        function switchDocTab(tabName) {
+        async function switchDocTab(tabName) {
             currentDocTab = tabName;
             document.querySelectorAll('.doc-pane').forEach(p => p.classList.add('hidden'));
             const activePane = document.getElementById(`doc-content-${tabName}`);
@@ -2353,6 +2282,11 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     btn.className = 'doc-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer text-slate-700 hover:bg-brand-gold/20';
                 }
             });
+
+            if (currentEventId) {
+                const ev = eventsData.find(item => item.id === currentEventId);
+                if (ev) await renderSingleCleanSection(ev, tabName);
+            }
         }
 
         function resetSectionEditUI(sec) {
@@ -2393,11 +2327,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             ev[`${sec}_pages`] = pagesHtml;
             ev[sec] = pagesHtml.join('<div style="page-break-before:always;"></div>');
             if (ev.rawDocxBuffers) delete ev.rawDocxBuffers[sec];
+            if (ev.docxUrls) delete ev.docxUrls[sec];
 
-            await saveSingleEventToDb(ev);
+            await saveEventToSupabase(ev);
             await renderSingleCleanSection(ev, sec);
             updateTabDots(ev);
-            showToast("Өзгерістер сақталды!");
+            renderQuartersSelector();
+            renderQuarterMonths(activeQuarter);
+            showToast("Өзгерістер ортақ базаға сақталды!");
         }
 
         // ==================== WORD ҚҰРАЛДАР ТАҚТАСЫ ====================
@@ -2541,7 +2478,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 } else {
                     editor.appendChild(box);
                 }
-                showToast("Сурет қосылды! Бұрышынан кішірейтіп немесе ұстап жылжыта аласыз.");
+                showToast("Сурет қосылды!");
             };
             reader.readAsDataURL(file);
         }
@@ -2569,7 +2506,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             const bodyHtml = getCleanPrintableOrWordHtml(sec);
             if (!bodyHtml || !bodyHtml.trim()) {
-                showToast("Word-қа жүктеу үшін алдымен құжатты толтырыңыз немесе .docx файлын жүктеңіз.");
+                showToast("Word-қа жүктеу үшін алдымен құжатты толтырыңыз.");
                 return;
             }
             downloadWordHtml(bodyHtml, `${label}_${ev.date}.doc`, false);
@@ -2599,11 +2536,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <head>
 <meta charset="utf-8">
 <title>${escapeHtml(filename)}</title>
-<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
 <style>
 ${pageCss}
 body { font-family: "Times New Roman", Times, serif; font-size: 13.5pt; line-height: 1.45; color: #000000; }
-table { border-collapse: collapse; width: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+table { border-collapse: collapse; width: 100%; }
 td, th { border: 1pt solid #000000; padding: 5pt 7pt; vertical-align: top; }
 p, div { margin: 0 0 6pt 0; }
 img { max-width: 100%; height: auto; }
@@ -2657,7 +2593,11 @@ img { max-width: 100%; height: auto; }
         }
 
         function renderEventCardHTML(ev) {
-            const uploadedCount = CLEAN_SECTIONS.filter(s => Boolean(ev.rawDocxBuffers && ev.rawDocxBuffers[s.key]) || (ev[s.key] && ev[s.key].trim().length > 0)).length;
+            const uploadedCount = CLEAN_SECTIONS.filter(s =>
+                Boolean(ev.rawDocxBuffers && ev.rawDocxBuffers[s.key]) ||
+                Boolean(ev.docxUrls && ev.docxUrls[s.key]) ||
+                (ev[s.key] && ev[s.key].trim().length > 0)
+            ).length;
             return `
                 <div onclick="openEventModal(${ev.id}, 'scenario')"
                     class="group relative bg-white rounded-2xl border-2 border-slate-200/90 hover:border-brand-gold shadow-sm hover:shadow-xl transition-all p-5 flex flex-col justify-between min-h-[220px] cursor-pointer overflow-hidden">
@@ -2763,17 +2703,15 @@ img { max-width: 100%; height: auto; }
                 time: (parts[1] || '15:00').trim()
             };
             eventsData.push(newEv);
-            await saveSingleEventToDb(newEv);
+            await saveEventToSupabase(newEv);
             closeAddEventModal();
             selectQuarter(qId);
             await openEventModal(newId, 'scenario');
-            showToast("Жаңа іс-шара қосылды!");
+            showToast("Жаңа іс-шара ортақ базаға қосылды!");
         }
 
-        // ==================== ҮЙІРМЕЛЕР ЖӘНЕ PDF ҚҰЖАТТАР ====================
-        const CLUB_DB_NAME = 'ZhanakurylysClubDocsDB_v1';
-        const CLUB_STORE_NAME = 'club_pdfs';
-        let clubDb = null, currentClubId = null, currentClubSection = 'plan', currentViewingClubPdfUrl = null, currentViewingClubPdfDoc = null, currentViewingClubDocId = null, editingClubDoc = null, clubDocCounts = {};
+        // ==================== ҮЙІРМЕЛЕР ЖӘНЕ PDF ҚҰЖАТТАР (SUPABASE STORAGE) ====================
+        let currentClubId = null, currentClubSection = 'plan', currentViewingClubPdfUrl = null, currentViewingClubPdfDoc = null, currentViewingClubDocId = null, editingClubDoc = null;
 
         function exportClubRosterToWord(elementId, filename) {
             const el = document.getElementById(elementId);
@@ -2792,51 +2730,21 @@ img { max-width: 100%; height: auto; }
             return currentClubId === 1 && (currentClubSection === 'participants' || currentClubSection === 'plan');
         }
 
-        function initClubDatabase() {
-            return new Promise((resolve) => {
-                const req = indexedDB.open(CLUB_DB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(CLUB_STORE_NAME)) {
-                        const store = db.createObjectStore(CLUB_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                        store.createIndex('clubId', 'clubId', { unique: false });
-                    }
-                };
-                req.onsuccess = (e) => {
-                    clubDb = e.target.result;
-                    refreshClubDocCounts().then(resolve);
-                };
-                req.onerror = () => resolve();
+        function updateCloudClubCounts() {
+            const counts = {};
+            cloudPdfCache.club.forEach((item) => {
+                const sec = item.section || "plan";
+                if (!counts[item.clubId]) counts[item.clubId] = { total: 0 };
+                counts[item.clubId].total += 1;
+                counts[item.clubId][sec] = (counts[item.clubId][sec] || 0) + 1;
             });
-        }
-
-        function refreshClubDocCounts() {
-            return new Promise((resolve) => {
-                if (!clubDb) return resolve();
-                const req = clubDb.transaction(CLUB_STORE_NAME, 'readonly').objectStore(CLUB_STORE_NAME).getAll();
-                req.onsuccess = () => {
-                    const counts = {};
-                    (req.result || []).forEach(item => {
-                        const sec = item.section || 'plan';
-                        if (!counts[item.clubId]) counts[item.clubId] = { total: 0 };
-                        counts[item.clubId].total += 1;
-                        counts[item.clubId][sec] = (counts[item.clubId][sec] || 0) + 1;
-                    });
-                    clubDocCounts = counts;
-                    renderClubs();
-                    if (currentClubId) {
-                        updateClubSectionTabBadges();
-                    }
-                    resolve();
-                };
-            });
+            clubDocCounts = counts;
+            renderClubs();
+            if (currentClubId) updateClubSectionTabBadges();
         }
 
         function resetClubPdfViewer() {
-            if (currentViewingClubPdfUrl) {
-                URL.revokeObjectURL(currentViewingClubPdfUrl);
-                currentViewingClubPdfUrl = null;
-            }
+            currentViewingClubPdfUrl = null;
             currentViewingClubPdfDoc = null;
             currentViewingClubDocId = null;
             document.getElementById('club-pdf-iframe').src = '';
@@ -2852,13 +2760,9 @@ img { max-width: 100%; height: auto; }
             CLUB_SECTIONS.forEach(sec => {
                 const badge = document.getElementById(`club-count-${sec.key}`);
                 if (!badge) return;
-                if (currentClubId === 1 && sec.key === 'participants') {
-                    badge.textContent = '11';
-                } else if (currentClubId === 1 && sec.key === 'plan') {
-                    badge.textContent = '15';
-                } else {
-                    badge.textContent = cCounts[sec.key] || 0;
-                }
+                if (currentClubId === 1 && sec.key === 'participants') badge.textContent = '11';
+                else if (currentClubId === 1 && sec.key === 'plan') badge.textContent = '15';
+                else badge.textContent = cCounts[sec.key] || 0;
             });
         }
 
@@ -2925,90 +2829,87 @@ img { max-width: 100%; height: auto; }
             document.getElementById('club-upload-form-title').innerHTML = `<i data-lucide="file-up" class="w-4 h-4 text-brand-gold"></i> «${escapeHtml(secObj.label)}» бөліміне PDF қосу`;
             document.getElementById('club-docs-list-heading').textContent = `${secObj.label} — Құжаттар тізімі`;
 
-            await renderClubModalDocs();
+            renderClubModalDocs();
             lucide.createIcons();
         }
 
         async function handleClubPdfUpload(e) {
             e.preventDefault();
-            if (!currentClubId || !clubDb || isCleanPresetClubSection()) return;
-            const docTitle = document.getElementById('club-doc-title').value.trim();
-            const file = document.getElementById('club-doc-file').files[0];
+            if (!currentClubId || isCleanPresetClubSection()) return;
+            const titleInp = document.getElementById('club-doc-title');
+            const fileInp = document.getElementById('club-doc-file');
+            const docTitle = titleInp.value.trim();
+            const file = fileInp.files[0];
             if (!docTitle || !file) return;
 
-            const arrayBuffer = await file.arrayBuffer();
-            const tx = clubDb.transaction(CLUB_STORE_NAME, 'readwrite');
-            tx.objectStore(CLUB_STORE_NAME).add({
-                clubId: currentClubId,
-                section: currentClubSection,
-                docTitle,
-                fileName: file.name,
-                pdfData: arrayBuffer
-            });
-            tx.oncomplete = async () => {
-                document.getElementById('club-doc-title').value = '';
-                document.getElementById('club-doc-file').value = '';
-                await refreshClubDocCounts();
-                await renderClubModalDocs();
-                showToast("PDF құжат тізімге қосылды!");
-            };
+            showToast("PDF ортақ базаға жүктелуде...");
+            const uploaded = await uploadFileToStorage(file, `clubs/club_${currentClubId}`, 'pdf');
+            if (!uploaded) return;
+
+            const { error } = await sb.from('documents').insert([{
+                title: docTitle,
+                category: 'club_pdf',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: {
+                    clubId: currentClubId,
+                    section: currentClubSection || 'plan',
+                    docTitle,
+                    fileName: file.name,
+                    fileUrl: uploaded.publicUrl,
+                    storagePath: uploaded.storagePath
+                }
+            }]);
+
+            if (!error) {
+                titleInp.value = '';
+                fileInp.value = '';
+                await syncAllFromSupabase(false);
+                renderClubModalDocs();
+                showToast("PDF құжат барлық компьютерлерге ортақ болып сақталды!");
+            }
         }
 
         function renderClubModalDocs() {
-            return new Promise((resolve) => {
-                if (!clubDb || !currentClubId || isCleanPresetClubSection()) return resolve();
-                const req = clubDb.transaction(CLUB_STORE_NAME, 'readonly').objectStore(CLUB_STORE_NAME).index('clubId').getAll(currentClubId);
-                req.onsuccess = () => {
-                    const docs = (req.result || []).filter(d => (d.section || 'plan') === currentClubSection);
-                    const badge = document.getElementById('club-docs-count-badge');
-                    if (badge) badge.textContent = `${docs.length} құжат`;
+            if (!currentClubId || isCleanPresetClubSection()) return;
+            const docs = cloudPdfCache.club.filter(
+                (d) => Number(d.clubId) === Number(currentClubId) && (d.section || 'plan') === currentClubSection
+            );
+            const badge = document.getElementById('club-docs-count-badge');
+            if (badge) badge.textContent = `${docs.length} құжат`;
 
-                    if (docs.length === 0) {
-                        document.getElementById('club-docs-list').innerHTML = `
-                            <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">
-                                Бұл бөлімде әзірге PDF құжат жоқ. Жоғарыдағы форма арқылы жаңа PDF құжат қосыңыз.
-                            </div>`;
-                        resolve();
-                        return;
-                    }
+            const listEl = document.getElementById('club-docs-list');
+            if (!listEl) return;
 
-                    document.getElementById('club-docs-list').innerHTML = docs.map(d => `
-                        <div class="p-3 rounded-xl border ${currentViewingClubDocId === d.id ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                            <div onclick="previewClubDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-                                <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-                                <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-                            </div>
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button type="button" onclick="previewClubDocById(${d.id})" title="Толық экранда ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">
-                                    Ашу
-                                </button>
-                                <button type="button" onclick="openEditClubDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition">
-                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button type="button" onclick="deleteClubDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                    lucide.createIcons();
-                    resolve();
-                };
-            });
+            if (docs.length === 0) {
+                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Бұл бөлімде әзірге PDF құжат жоқ.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = docs.map(d => `
+                <div class="p-3 rounded-xl border ${currentViewingClubDocId === d.id ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewClubDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="previewClubDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="openEditClubDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteClubDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
         }
 
         function openEditClubDocModal(docId) {
-            const req = clubDb.transaction(CLUB_STORE_NAME, 'readonly').objectStore(CLUB_STORE_NAME).get(docId);
-            req.onsuccess = () => {
-                const doc = req.result;
-                if (!doc) return;
-                editingClubDoc = doc;
-                document.getElementById('edit-club-doc-title').value = doc.docTitle;
-                document.getElementById('edit-club-doc-file').value = '';
-                document.getElementById('edit-club-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
-                document.getElementById('edit-club-doc-modal').classList.remove('hidden');
-                lucide.createIcons();
-            };
+            const doc = cloudPdfCache.club.find(d => d.id === docId);
+            if (!doc) return;
+            editingClubDoc = doc;
+            document.getElementById('edit-club-doc-title').value = doc.docTitle;
+            document.getElementById('edit-club-doc-file').value = '';
+            document.getElementById('edit-club-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
+            document.getElementById('edit-club-doc-modal').classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function closeEditClubDocModal() {
@@ -3023,63 +2924,67 @@ img { max-width: 100%; height: auto; }
             const newFile = document.getElementById('edit-club-doc-file').files[0];
             if (!newTitle) return;
 
-            const updatedDoc = { ...editingClubDoc, docTitle: newTitle };
+            let fileUrl = editingClubDoc.fileUrl;
+            let storagePath = editingClubDoc.storagePath;
+            let fileName = editingClubDoc.fileName;
+
             if (newFile) {
-                updatedDoc.pdfData = await newFile.arrayBuffer();
-                updatedDoc.fileName = newFile.name;
+                const uploaded = await uploadFileToStorage(newFile, `clubs/club_${editingClubDoc.clubId}`, 'pdf');
+                if (!uploaded) return;
+                if (storagePath) await deleteFileFromStorage(storagePath);
+                fileUrl = uploaded.publicUrl;
+                storagePath = uploaded.storagePath;
+                fileName = newFile.name;
             }
 
-            const tx = clubDb.transaction(CLUB_STORE_NAME, 'readwrite');
-            tx.objectStore(CLUB_STORE_NAME).put(updatedDoc);
-            tx.oncomplete = async () => {
-                const wasViewing = currentViewingClubDocId === updatedDoc.id;
-                closeEditClubDocModal();
-                await renderClubModalDocs();
-                if (wasViewing) {
-                    previewClubDocById(updatedDoc.id);
+            await sb.from('documents').update({
+                title: newTitle,
+                content: {
+                    clubId: editingClubDoc.clubId,
+                    section: editingClubDoc.section || 'plan',
+                    docTitle: newTitle,
+                    fileName,
+                    fileUrl,
+                    storagePath
                 }
-                showToast("Үйірме құжаты өзгертілді!");
-            };
+            }).eq('id', editingClubDoc.id);
+
+            const wasViewing = currentViewingClubDocId === editingClubDoc.id;
+            const editedId = editingClubDoc.id;
+            closeEditClubDocModal();
+            await syncAllFromSupabase(false);
+            renderClubModalDocs();
+            if (wasViewing) previewClubDocById(editedId);
+            showToast("Үйірме құжаты жаңартылды!");
         }
 
-        function deleteClubDocById(docId) {
-            if (!confirm("Бұл PDF құжатты тізімнен өшіруге сенімдісіз бе?")) return;
-            const tx = clubDb.transaction(CLUB_STORE_NAME, 'readwrite');
-            tx.objectStore(CLUB_STORE_NAME).delete(docId);
-            tx.oncomplete = async () => {
-                if (currentViewingClubDocId === docId) {
-                    resetClubPdfViewer();
-                }
-                await refreshClubDocCounts();
-                await renderClubModalDocs();
-                showToast("PDF құжат өшірілді!");
-            };
+        async function deleteClubDocById(docId) {
+            if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+            const doc = cloudPdfCache.club.find(d => d.id === docId);
+            if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
+            await sb.from('documents').delete().eq('id', docId);
+            if (currentViewingClubDocId === docId) resetClubPdfViewer();
+            await syncAllFromSupabase(false);
+            renderClubModalDocs();
+            showToast("PDF құжат өшірілді!");
         }
 
         function previewClubDocById(docId) {
-            const req = clubDb.transaction(CLUB_STORE_NAME, 'readonly').objectStore(CLUB_STORE_NAME).get(docId);
-            req.onsuccess = () => {
-                const doc = req.result;
-                if (!doc) return;
-                if (currentViewingClubPdfUrl) URL.revokeObjectURL(currentViewingClubPdfUrl);
-                currentViewingClubPdfUrl = URL.createObjectURL(new Blob([doc.pdfData], { type: 'application/pdf' }));
-                currentViewingClubPdfDoc = doc;
-                currentViewingClubDocId = doc.id;
-                document.getElementById('club-pdf-viewer-title').textContent = doc.docTitle;
-                document.getElementById('club-pdf-iframe').src = `${currentViewingClubPdfUrl}#toolbar=1&navpanes=0&view=FitH`;
-                document.getElementById('club-pdf-empty-state').classList.add('hidden');
-                document.getElementById('club-pdf-viewer-box').classList.remove('hidden');
-                lucide.createIcons();
-                renderClubModalDocs();
-            };
+            const doc = cloudPdfCache.club.find(d => d.id === docId);
+            if (!doc || !doc.fileUrl) return;
+            currentViewingClubPdfUrl = doc.fileUrl;
+            currentViewingClubPdfDoc = doc;
+            currentViewingClubDocId = doc.id;
+            document.getElementById('club-pdf-viewer-title').textContent = doc.docTitle;
+            document.getElementById('club-pdf-iframe').src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
+            document.getElementById('club-pdf-empty-state').classList.add('hidden');
+            document.getElementById('club-pdf-viewer-box').classList.remove('hidden');
+            renderClubModalDocs();
         }
 
         function downloadCurrentClubPdf() {
             if (!currentViewingClubPdfUrl || !currentViewingClubPdfDoc) return;
-            const a = document.createElement('a');
-            a.href = currentViewingClubPdfUrl;
-            a.download = currentViewingClubPdfDoc.fileName;
-            a.click();
+            window.open(currentViewingClubPdfUrl, '_blank');
         }
 
         function renderClubs() {
@@ -3087,9 +2992,7 @@ img { max-width: 100%; height: auto; }
             if (!container) return;
             container.innerHTML = CLUBS_DATA.map(c => {
                 const basePdfCount = (clubDocCounts[c.id] && clubDocCounts[c.id].total) || 0;
-                const badgeLabel = c.id === 1
-                    ? `${basePdfCount} PDF • 15 жоспар / 11 тізім`
-                    : `${basePdfCount} PDF`;
+                const badgeLabel = c.id === 1 ? `${basePdfCount} PDF • 15 жоспар / 11 тізім` : `${basePdfCount} PDF`;
                 return `
                     <div onclick="openClubModal(${c.id}, 'plan')" class="group bg-brand-cream/50 hover:bg-white rounded-2xl p-5 border-2 border-brand-gold/40 hover:border-brand-gold shadow-sm hover:shadow-lg transition-all space-y-3 cursor-pointer flex flex-col justify-between">
                         <div class="space-y-2">
@@ -3109,80 +3012,6 @@ img { max-width: 100%; height: auto; }
         }
 
         // ==================== МАТЕРИАЛДЫҚ-ТЕХНИКАЛЫҚ БАЗА ====================
-        const MTB_DB_NAME = 'ZhanakurylysMtbLandscapeDB_v1';
-        const MTB_STORE_NAME = 'mtb_passport';
-        let mtbDb = null;
-        let currentMtbHtml = DEFAULT_MTB_LANDSCAPE_HTML;
-
-        function initMtbDatabase() {
-            return new Promise((resolve) => {
-                const req = indexedDB.open(MTB_DB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(MTB_STORE_NAME)) {
-                        db.createObjectStore(MTB_STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-                req.onsuccess = (e) => {
-                    mtbDb = e.target.result;
-                    loadMtbPassportFromDb().then(resolve);
-                };
-                req.onerror = () => {
-                    renderMtbMainView();
-                    resolve();
-                };
-            });
-        }
-
-        function loadMtbPassportFromDb() {
-            return new Promise((resolve) => {
-                if (!mtbDb) {
-                    renderMtbMainView();
-                    return resolve();
-                }
-                const tx = mtbDb.transaction(MTB_STORE_NAME, 'readonly');
-                const req = tx.objectStore(MTB_STORE_NAME).get('main_passport');
-                req.onsuccess = () => {
-                    if (req.result && typeof req.result.html === 'string' && req.result.html.trim().length > 0) {
-                        currentMtbHtml = req.result.html;
-                    } else {
-                        currentMtbHtml = DEFAULT_MTB_LANDSCAPE_HTML;
-                    }
-                    renderMtbMainView();
-                    resolve();
-                };
-                req.onerror = () => {
-                    renderMtbMainView();
-                    resolve();
-                };
-            });
-        }
-
-        async function saveMtbPassportToDb(html) {
-  currentMtbHtml = html;
-  // 1. Бұрынғыдай телефонға да сақтау
-  if(mtbDb){
-    try{
-      const tx = mtbDb.transaction(MTB_STORE_NAME, 'readwrite');
-      tx.objectStore(MTB_STORE_NAME).put({ id: 'main_passport', html });
-    }catch(e){}
-  }
-  // 2. ЕНДІ Supabase-ке де сақтау - МІНЕ НЕГІЗГІ ТҮЗЕТУ
-  try{
-    const { error } = await supabaseClient
-      .from('documents')
-      .insert([{
-        title: 'МТБ - Негізгі паспорт',
-        category: 'mtb_passport',
-        doc_date: new Date().toISOString().slice(0,10),
-        content: { html: html },
-        file_url: ''
-      }]);
-    if(error) console.log('Supabase қате:', error);
-    else console.log('Supabase-ке сақталды!');
-  }catch(e){ console.log('Supabase қате:', e); }
-}
-
         function renderMtbMainView() {
             const viewEl = document.getElementById('mtb-main-view-content');
             const editorEl = document.getElementById('mtb-main-editor');
@@ -3213,10 +3042,10 @@ img { max-width: 100%; height: auto; }
             const clone = editorEl.cloneNode(true);
             clone.querySelectorAll('.resizable-img-box.selected').forEach(b => b.classList.remove('selected'));
             const nextHtml = sanitizeRichHtml(clone.innerHTML);
-            await saveMtbPassportToDb(nextHtml);
+            await saveMtbPassportToSupabase(nextHtml);
             renderMtbMainView();
             cancelMtbMainEdit();
-            showToast("Материалдық-техникалық база мәліметтері сақталды!");
+            showToast("Материалдық-техникалық база ортақ базаға сақталды!");
         }
 
         function triggerMtbWordUpload() {
@@ -3248,10 +3077,10 @@ img { max-width: 100%; height: auto; }
                     const txt = await file.text();
                     htmlContent = sanitizeRichHtml(`<div class="mtb-landscape-doc">${formatDocContentForDisplay(txt)}</div>`);
                 }
-                await saveMtbPassportToDb(htmlContent);
+                await saveMtbPassportToSupabase(htmlContent);
                 renderMtbMainView();
                 cancelMtbMainEdit();
-                showToast(`«${file.name}» жүктелді және сақталды!`);
+                showToast(`«${file.name}» жүктелді және ортақ базаға сақталды!`);
             } catch (err) {
                 console.error(err);
                 showToast("Файлды оқу кезінде қате шықты.");
@@ -3268,43 +3097,19 @@ img { max-width: 100%; height: auto; }
         }
 
         function exportMtbToWord() {
-            const bodyHtml = getActiveMtbHtml();
-            downloadWordHtml(bodyHtml, `Материалдық_техникалық_база_альбомдық.doc`, true);
+            downloadWordHtml(getActiveMtbHtml(), `Материалдық_техникалық_база_альбомдық.doc`, true);
         }
 
         function printMtbLandscape() {
-            const bodyHtml = getActiveMtbHtml();
-            const sheetHtml = `<div class="mtb-landscape-sheet"><div class="rich-doc-display">${bodyHtml}</div></div>`;
+            const sheetHtml = `<div class="mtb-landscape-sheet"><div class="rich-doc-display">${getActiveMtbHtml()}</div></div>`;
             triggerPrintWithArea(sheetHtml, true);
         }
 
-        // ==================== АҚЫЛЫ ҚЫЗМЕТ ====================
-        const PAID_DB_NAME = 'ZhanakurylysPaidServicesDB_v1';
-        const PAID_STORE_NAME = 'paid_pdfs';
-        let paidDb = null, currentViewingPaidPdfUrl = null, currentViewingPaidPdfDoc = null, currentViewingPaidDocId = null;
-
-        function initPaidServicesDatabase() {
-            return new Promise((resolve) => {
-                const req = indexedDB.open(PAID_DB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(PAID_STORE_NAME)) {
-                        db.createObjectStore(PAID_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                    }
-                };
-                req.onsuccess = (e) => {
-                    paidDb = e.target.result;
-                    renderPaidServiceDocs().then(resolve);
-                };
-                req.onerror = () => resolve();
-            });
-        }
+        // ==================== АҚЫЛЫ ҚЫЗМЕТ (SUPABASE STORAGE) ====================
+        let currentViewingPaidPdfUrl = null, currentViewingPaidPdfDoc = null, currentViewingPaidDocId = null;
 
         function resetPaidPdfViewer() {
-            if (currentViewingPaidPdfUrl) {
-                URL.revokeObjectURL(currentViewingPaidPdfUrl);
-                currentViewingPaidPdfUrl = null;
-            }
+            currentViewingPaidPdfUrl = null;
             currentViewingPaidPdfDoc = null;
             currentViewingPaidDocId = null;
             document.getElementById('paid-pdf-iframe').src = '';
@@ -3315,109 +3120,94 @@ img { max-width: 100%; height: auto; }
 
         async function handlePaidServicePdfUpload(e) {
             e.preventDefault();
-            if (!paidDb) return;
-            const docTitle = document.getElementById('paid-doc-title').value.trim();
-            const file = document.getElementById('paid-doc-file').files[0];
+            const titleInp = document.getElementById('paid-doc-title');
+            const fileInp = document.getElementById('paid-doc-file');
+            const docTitle = titleInp.value.trim();
+            const file = fileInp.files[0];
             if (!docTitle || !file) return;
 
-            const arrayBuffer = await file.arrayBuffer();
-            const tx = paidDb.transaction(PAID_STORE_NAME, 'readwrite');
-            const addReq = tx.objectStore(PAID_STORE_NAME).add({
-                docTitle,
-                fileName: file.name,
-                orientation: 'landscape',
-                pdfData: arrayBuffer
-            });
-            tx.oncomplete = async () => {
-                document.getElementById('paid-doc-title').value = '';
-                document.getElementById('paid-doc-file').value = '';
-                await renderPaidServiceDocs();
-                if (addReq && addReq.result) {
-                    previewPaidDocById(addReq.result);
+            showToast("Альбомдық PDF ортақ базаға жүктелуде...");
+            const uploaded = await uploadFileToStorage(file, "paid_services", 'pdf');
+            if (!uploaded) return;
+
+            const { data, error } = await sb.from('documents').insert([{
+                title: docTitle,
+                category: 'paid_pdf',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: {
+                    docTitle,
+                    fileName: file.name,
+                    orientation: 'landscape',
+                    fileUrl: uploaded.publicUrl,
+                    storagePath: uploaded.storagePath
                 }
-                showToast("Альбомдық PDF құжат қосылды!");
-            };
+            }]).select();
+
+            if (!error) {
+                titleInp.value = '';
+                fileInp.value = '';
+                await syncAllFromSupabase(false);
+                if (data && data[0]) previewPaidDocById(data[0].id);
+                showToast("Альбомдық PDF ортақ базаға сақталды!");
+            }
         }
 
         function renderPaidServiceDocs() {
-            return new Promise((resolve) => {
-                if (!paidDb) return resolve();
-                const req = paidDb.transaction(PAID_STORE_NAME, 'readonly').objectStore(PAID_STORE_NAME).getAll();
-                req.onsuccess = () => {
-                    const docs = req.result || [];
-                    const badge = document.getElementById('paid-docs-count-badge');
-                    if (badge) badge.textContent = `${docs.length} құжат`;
+            const docs = cloudPdfCache.paid;
+            const badge = document.getElementById('paid-docs-count-badge');
+            if (badge) badge.textContent = `${docs.length} құжат`;
 
-                    if (docs.length === 0) {
-                        document.getElementById('paid-docs-list').innerHTML = `
-                            <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500 bg-white">
-                                Ақылы қызмет бойынша альбомдық PDF құжаттар әзірге жоқ.
-                            </div>`;
-                        resolve();
-                        return;
-                    }
+            const listEl = document.getElementById('paid-docs-list');
+            if (!listEl) return;
 
-                    document.getElementById('paid-docs-list').innerHTML = docs.map(d => `
-                        <div class="p-3 rounded-xl border ${currentViewingPaidDocId === d.id ? 'border-brand-teal bg-brand-cream/80 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                            <div onclick="previewPaidDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-                                <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-                                <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span>
-                            </div>
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">
-                                    Ашу
-                                </button>
-                                <button type="button" onclick="deletePaidDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                    lucide.createIcons();
-                    resolve();
-                };
-            });
+            if (docs.length === 0) {
+                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500 bg-white">Ақылы қызмет бойынша альбомдық PDF құжаттар әзірге жоқ.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = docs.map(d => `
+                <div class="p-3 rounded-xl border ${currentViewingPaidDocId === d.id ? 'border-brand-teal bg-brand-cream/80 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewPaidDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="deletePaidDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
         }
 
         function previewPaidDocById(docId) {
-            if (!paidDb) return;
-            const req = paidDb.transaction(PAID_STORE_NAME, 'readonly').objectStore(PAID_STORE_NAME).get(docId);
-            req.onsuccess = () => {
-                const doc = req.result;
-                if (!doc) return;
-                if (currentViewingPaidPdfUrl) URL.revokeObjectURL(currentViewingPaidPdfUrl);
-                currentViewingPaidPdfUrl = URL.createObjectURL(new Blob([doc.pdfData], { type: 'application/pdf' }));
-                currentViewingPaidPdfDoc = doc;
-                currentViewingPaidDocId = doc.id;
-                document.getElementById('paid-pdf-viewer-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
-                document.getElementById('paid-fs-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
-                document.getElementById('paid-pdf-iframe').src = currentViewingPaidPdfUrl;
-                document.getElementById('paid-fs-iframe').src = currentViewingPaidPdfUrl;
-                document.getElementById('paid-pdf-empty-state').classList.add('hidden');
-                document.getElementById('paid-pdf-viewer-box').classList.remove('hidden');
-                renderPaidServiceDocs();
-            };
+            const doc = cloudPdfCache.paid.find(d => d.id === docId);
+            if (!doc || !doc.fileUrl) return;
+            currentViewingPaidPdfUrl = doc.fileUrl;
+            currentViewingPaidPdfDoc = doc;
+            currentViewingPaidDocId = doc.id;
+            document.getElementById('paid-pdf-viewer-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
+            document.getElementById('paid-fs-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
+            document.getElementById('paid-pdf-iframe').src = doc.fileUrl;
+            document.getElementById('paid-fs-iframe').src = doc.fileUrl;
+            document.getElementById('paid-pdf-empty-state').classList.add('hidden');
+            document.getElementById('paid-pdf-viewer-box').classList.remove('hidden');
+            renderPaidServiceDocs();
         }
 
-        function deletePaidDocById(docId) {
-            if (!confirm("Бұл PDF құжатты өшіруге сенімдісіз бе?")) return;
-            const tx = paidDb.transaction(PAID_STORE_NAME, 'readwrite');
-            tx.objectStore(PAID_STORE_NAME).delete(docId);
-            tx.oncomplete = async () => {
-                if (currentViewingPaidDocId === docId) {
-                    resetPaidPdfViewer();
-                }
-                await renderPaidServiceDocs();
-                showToast("PDF құжат өшірілді!");
-            };
+        async function deletePaidDocById(docId) {
+            if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+            const doc = cloudPdfCache.paid.find(d => d.id === docId);
+            if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
+            await sb.from('documents').delete().eq('id', docId);
+            if (currentViewingPaidDocId === docId) resetPaidPdfViewer();
+            await syncAllFromSupabase(false);
+            showToast("PDF құжат өшірілді!");
         }
 
         function downloadCurrentPaidPdf() {
-            if (!currentViewingPaidPdfUrl || !currentViewingPaidPdfDoc) return;
-            const a = document.createElement('a');
-            a.href = currentViewingPaidPdfUrl;
-            a.download = currentViewingPaidPdfDoc.fileName;
-            a.click();
+            if (!currentViewingPaidPdfUrl) return;
+            window.open(currentViewingPaidPdfUrl, '_blank');
         }
 
         function openPaidServiceFullscreen() {
@@ -3430,45 +3220,20 @@ img { max-width: 100%; height: auto; }
             document.getElementById('paid-pdf-fullscreen-modal').classList.add('hidden');
         }
 
-        // ==================== ҚЫЗМЕТКЕРЛЕР ====================
-        const STAFF_DB_NAME = 'ZhanakurylysStaffDocsDB';
-        const STAFF_STORE_NAME = 'staff_pdfs';
-        let staffDb = null, currentStaffId = null, currentViewingPdfUrl = null, currentViewingPdfDoc = null, currentViewingDocId = null, editingStaffDoc = null, staffDocCounts = {};
+        // ==================== ҚЫЗМЕТКЕРЛЕР (SUPABASE STORAGE) ====================
+        let currentStaffId = null, currentViewingPdfUrl = null, currentViewingPdfDoc = null, currentViewingDocId = null, editingStaffDoc = null;
 
-        function initStaffDatabase() {
-            return new Promise((resolve) => {
-                const req = indexedDB.open(STAFF_DB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STAFF_STORE_NAME)) {
-                        const store = db.createObjectStore(STAFF_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                        store.createIndex('staffId', 'staffId', { unique: false });
-                    }
-                };
-                req.onsuccess = (e) => { staffDb = e.target.result; refreshStaffDocCounts().then(resolve); };
-                req.onerror = () => resolve();
+        function updateCloudStaffCounts() {
+            const counts = {};
+            cloudPdfCache.staff.forEach((item) => {
+                counts[item.staffId] = (counts[item.staffId] || 0) + 1;
             });
-        }
-
-        function refreshStaffDocCounts() {
-            return new Promise((resolve) => {
-                if (!staffDb) return resolve();
-                const req = staffDb.transaction(STAFF_STORE_NAME, 'readonly').objectStore(STAFF_STORE_NAME).getAll();
-                req.onsuccess = () => {
-                    const counts = {};
-                    (req.result || []).forEach(item => { counts[item.staffId] = (counts[item.staffId] || 0) + 1; });
-                    staffDocCounts = counts;
-                    renderStaff();
-                    resolve();
-                };
-            });
+            staffDocCounts = counts;
+            renderStaff();
         }
 
         function resetStaffPdfViewer() {
-            if (currentViewingPdfUrl) {
-                URL.revokeObjectURL(currentViewingPdfUrl);
-                currentViewingPdfUrl = null;
-            }
+            currentViewingPdfUrl = null;
             currentViewingPdfDoc = null;
             currentViewingDocId = null;
             document.getElementById('staff-pdf-iframe').src = '';
@@ -3485,86 +3250,90 @@ img { max-width: 100%; height: auto; }
             document.getElementById('staff-modal-name').textContent = staff.name;
             document.getElementById('staff-modal-role').textContent = staff.role;
             document.getElementById('staff-modal-resp').textContent = staff.resp;
-            await renderStaffModalDocs();
+            renderStaffModalDocs();
             document.getElementById('staff-dossier-modal').classList.remove('hidden');
             lucide.createIcons();
         }
         function closeStaffModal() {
             document.getElementById('staff-dossier-modal').classList.add('hidden');
+            currentStaffId = null;
             resetStaffPdfViewer();
         }
 
         async function handleStaffPdfUpload(e) {
             e.preventDefault();
-            const docTitle = document.getElementById('staff-doc-title').value.trim();
-            const file = document.getElementById('staff-doc-file').files[0];
+            if (!currentStaffId) return;
+            const titleInp = document.getElementById('staff-doc-title');
+            const fileInp = document.getElementById('staff-doc-file');
+            const docTitle = titleInp.value.trim();
+            const file = fileInp.files[0];
             if (!docTitle || !file) return;
-            const arrayBuffer = await file.arrayBuffer();
-            const tx = staffDb.transaction(STAFF_STORE_NAME, 'readwrite');
-            tx.objectStore(STAFF_STORE_NAME).add({ staffId: currentStaffId, docTitle, fileName: file.name, pdfData: arrayBuffer });
-            tx.oncomplete = async () => {
-                document.getElementById('staff-doc-title').value = '';
-                document.getElementById('staff-doc-file').value = '';
-                await refreshStaffDocCounts();
-                await renderStaffModalDocs();
-                showToast("PDF құжат жүктелді!");
-            };
+
+            showToast("Қызметкер құжаты ортақ базаға жүктелуде...");
+            const uploaded = await uploadFileToStorage(file, `staff/staff_${currentStaffId}`, 'pdf');
+            if (!uploaded) return;
+
+            const { error } = await sb.from('documents').insert([{
+                title: docTitle,
+                category: 'staff_pdf',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: {
+                    staffId: currentStaffId,
+                    docTitle,
+                    fileName: file.name,
+                    fileUrl: uploaded.publicUrl,
+                    storagePath: uploaded.storagePath
+                }
+            }]);
+
+            if (!error) {
+                titleInp.value = '';
+                fileInp.value = '';
+                await syncAllFromSupabase(false);
+                renderStaffModalDocs();
+                showToast("Қызметкер құжаты ортақ базаға сақталды!");
+            }
         }
 
         function renderStaffModalDocs() {
-            return new Promise((resolve) => {
-                const req = staffDb.transaction(STAFF_STORE_NAME, 'readonly').objectStore(STAFF_STORE_NAME).index('staffId').getAll(currentStaffId);
-                req.onsuccess = () => {
-                    const docs = req.result || [];
-                    const badge = document.getElementById('staff-docs-count-badge');
-                    if (badge) badge.textContent = `${docs.length} құжат`;
+            if (!currentStaffId) return;
+            const docs = cloudPdfCache.staff.filter(d => Number(d.staffId) === Number(currentStaffId));
+            const badge = document.getElementById('staff-docs-count-badge');
+            if (badge) badge.textContent = `${docs.length} құжат`;
 
-                    if (docs.length === 0) {
-                        document.getElementById('staff-docs-list').innerHTML = `
-                            <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">
-                                Құжаттар тізімі әзірге бос. Жоғарыдан жаңа PDF құжат қосыңыз.
-                            </div>`;
-                        resolve();
-                        return;
-                    }
+            const listEl = document.getElementById('staff-docs-list');
+            if (!listEl) return;
 
-                    document.getElementById('staff-docs-list').innerHTML = docs.map(d => `
-                        <div class="p-3 rounded-xl border ${currentViewingDocId === d.id ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                            <div onclick="previewStaffDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-                                <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-                                <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-                            </div>
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button type="button" onclick="previewStaffDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">
-                                    Ашу
-                                </button>
-                                <button type="button" onclick="openEditStaffDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition">
-                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button type="button" onclick="deleteStaffDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                    lucide.createIcons();
-                    resolve();
-                };
-            });
+            if (docs.length === 0) {
+                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = docs.map(d => `
+                <div class="p-3 rounded-xl border ${currentViewingDocId === d.id ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewStaffDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
+                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="previewStaffDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="openEditStaffDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteStaffDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
         }
 
         function openEditStaffDocModal(docId) {
-            const req = staffDb.transaction(STAFF_STORE_NAME, 'readonly').objectStore(STAFF_STORE_NAME).get(docId);
-            req.onsuccess = () => {
-                const doc = req.result;
-                if (!doc) return;
-                editingStaffDoc = doc;
-                document.getElementById('edit-staff-doc-title').value = doc.docTitle;
-                document.getElementById('edit-staff-doc-file').value = '';
-                document.getElementById('edit-staff-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
-                document.getElementById('edit-staff-doc-modal').classList.remove('hidden');
-                lucide.createIcons();
-            };
+            const doc = cloudPdfCache.staff.find(d => d.id === docId);
+            if (!doc) return;
+            editingStaffDoc = doc;
+            document.getElementById('edit-staff-doc-title').value = doc.docTitle;
+            document.getElementById('edit-staff-doc-file').value = '';
+            document.getElementById('edit-staff-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
+            document.getElementById('edit-staff-doc-modal').classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function closeEditStaffDocModal() {
@@ -3579,62 +3348,66 @@ img { max-width: 100%; height: auto; }
             const newFile = document.getElementById('edit-staff-doc-file').files[0];
             if (!newTitle) return;
 
-            const updatedDoc = { ...editingStaffDoc, docTitle: newTitle };
+            let fileUrl = editingStaffDoc.fileUrl;
+            let storagePath = editingStaffDoc.storagePath;
+            let fileName = editingStaffDoc.fileName;
+
             if (newFile) {
-                updatedDoc.pdfData = await newFile.arrayBuffer();
-                updatedDoc.fileName = newFile.name;
+                const uploaded = await uploadFileToStorage(newFile, `staff/staff_${editingStaffDoc.staffId}`, 'pdf');
+                if (!uploaded) return;
+                if (storagePath) await deleteFileFromStorage(storagePath);
+                fileUrl = uploaded.publicUrl;
+                storagePath = uploaded.storagePath;
+                fileName = newFile.name;
             }
 
-            const tx = staffDb.transaction(STAFF_STORE_NAME, 'readwrite');
-            tx.objectStore(STAFF_STORE_NAME).put(updatedDoc);
-            tx.oncomplete = async () => {
-                const wasViewing = currentViewingDocId === updatedDoc.id;
-                closeEditStaffDocModal();
-                await renderStaffModalDocs();
-                if (wasViewing) {
-                    previewStaffDocById(updatedDoc.id);
+            await sb.from('documents').update({
+                title: newTitle,
+                content: {
+                    staffId: editingStaffDoc.staffId,
+                    docTitle: newTitle,
+                    fileName,
+                    fileUrl,
+                    storagePath
                 }
-                showToast("Құжат өзгертілді!");
-            };
+            }).eq('id', editingStaffDoc.id);
+
+            const wasViewing = currentViewingDocId === editingStaffDoc.id;
+            const editedId = editingStaffDoc.id;
+            closeEditStaffDocModal();
+            await syncAllFromSupabase(false);
+            renderStaffModalDocs();
+            if (wasViewing) previewStaffDocById(editedId);
+            showToast("Құжат жаңартылды!");
         }
 
-        function deleteStaffDocById(docId) {
-            if (!confirm("Бұл құжатты тізімнен өшіруге сенімдісіз бе?")) return;
-            const tx = staffDb.transaction(STAFF_STORE_NAME, 'readwrite');
-            tx.objectStore(STAFF_STORE_NAME).delete(docId);
-            tx.oncomplete = async () => {
-                if (currentViewingDocId === docId) {
-                    resetStaffPdfViewer();
-                }
-                await refreshStaffDocCounts();
-                await renderStaffModalDocs();
-                showToast("Құжат өшірілді!");
-            };
+        async function deleteStaffDocById(docId) {
+            if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+            const doc = cloudPdfCache.staff.find(d => d.id === docId);
+            if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
+            await sb.from('documents').delete().eq('id', docId);
+            if (currentViewingDocId === docId) resetStaffPdfViewer();
+            await syncAllFromSupabase(false);
+            renderStaffModalDocs();
+            showToast("Құжат өшірілді!");
         }
 
         function previewStaffDocById(docId) {
-            const req = staffDb.transaction(STAFF_STORE_NAME, 'readonly').objectStore(STAFF_STORE_NAME).get(docId);
-            req.onsuccess = () => {
-                const doc = req.result;
-                if (!doc) return;
-                if (currentViewingPdfUrl) URL.revokeObjectURL(currentViewingPdfUrl);
-                currentViewingPdfUrl = URL.createObjectURL(new Blob([doc.pdfData], { type: 'application/pdf' }));
-                currentViewingPdfDoc = doc;
-                currentViewingDocId = doc.id;
-                document.getElementById('staff-pdf-viewer-title').textContent = doc.docTitle;
-                document.getElementById('staff-pdf-iframe').src = currentViewingPdfUrl;
-                document.getElementById('staff-pdf-empty-state').classList.add('hidden');
-                document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
-                renderStaffModalDocs();
-            };
+            const doc = cloudPdfCache.staff.find(d => d.id === docId);
+            if (!doc || !doc.fileUrl) return;
+            currentViewingPdfUrl = doc.fileUrl;
+            currentViewingPdfDoc = doc;
+            currentViewingDocId = doc.id;
+            document.getElementById('staff-pdf-viewer-title').textContent = doc.docTitle;
+            document.getElementById('staff-pdf-iframe').src = doc.fileUrl;
+            document.getElementById('staff-pdf-empty-state').classList.add('hidden');
+            document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
+            renderStaffModalDocs();
         }
 
         function downloadCurrentStaffPdf() {
             if (!currentViewingPdfUrl) return;
-            const a = document.createElement('a');
-            a.href = currentViewingPdfUrl;
-            a.download = currentViewingPdfDoc.fileName;
-            a.click();
+            window.open(currentViewingPdfUrl, '_blank');
         }
 
         function renderStaff() {
@@ -3680,8 +3453,9 @@ img { max-width: 100%; height: auto; }
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
         async function resetAllData() {
+            if (!confirm("Жоспар тізімін бастапқы 34 шараға қалпына келтіруді растайсыз ба?")) return;
+            await sb.from('documents').delete().eq('category', 'annual_event');
             eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
-            await saveAllEventsToDb();
             renderQuartersSelector();
             renderQuarterMonths(activeQuarter);
             showToast("Жоспар тізімі бастапқы күйге келтірілді!");
@@ -3698,25 +3472,15 @@ img { max-width: 100%; height: auto; }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (!document.getElementById('paid-pdf-fullscreen-modal').classList.contains('hidden')) {
-                    closePaidServiceFullscreen();
-                } else if (!document.getElementById('insert-table-modal').classList.contains('hidden')) {
-                    closeInsertTableModal();
-                } else if (!document.getElementById('add-event-modal').classList.contains('hidden')) {
-                    closeAddEventModal();
-                } else if (!document.getElementById('edit-club-doc-modal').classList.contains('hidden')) {
-                    closeEditClubDocModal();
-                } else if (!document.getElementById('edit-staff-doc-modal').classList.contains('hidden')) {
-                    closeEditStaffDocModal();
-                } else if (!document.getElementById('club-pdf-viewer-box').classList.contains('hidden')) {
-                    resetClubPdfViewer();
-                } else if (!document.getElementById('club-dossier-modal').classList.contains('hidden')) {
-                    closeClubModal();
-                } else if (!document.getElementById('staff-dossier-modal').classList.contains('hidden')) {
-                    closeStaffModal();
-                } else if (!document.getElementById('document-modal').classList.contains('hidden')) {
-                    closeDocumentModal();
-                }
+                if (!document.getElementById('paid-pdf-fullscreen-modal').classList.contains('hidden')) closePaidServiceFullscreen();
+                else if (!document.getElementById('insert-table-modal').classList.contains('hidden')) closeInsertTableModal();
+                else if (!document.getElementById('add-event-modal').classList.contains('hidden')) closeAddEventModal();
+                else if (!document.getElementById('edit-club-doc-modal').classList.contains('hidden')) closeEditClubDocModal();
+                else if (!document.getElementById('edit-staff-doc-modal').classList.contains('hidden')) closeEditStaffDocModal();
+                else if (!document.getElementById('club-pdf-viewer-box').classList.contains('hidden')) resetClubPdfViewer();
+                else if (!document.getElementById('club-dossier-modal').classList.contains('hidden')) closeClubModal();
+                else if (!document.getElementById('staff-dossier-modal').classList.contains('hidden')) closeStaffModal();
+                else if (!document.getElementById('document-modal').classList.contains('hidden')) closeDocumentModal();
             }
         });
 
@@ -3726,16 +3490,14 @@ img { max-width: 100%; height: auto; }
             initAllRichToolbars();
             updateMonthOptions();
 
-            await initEventsDatabase();
-            await initClubDatabase();
-            await initStaffDatabase();
-            await initMtbDatabase();
-            await initPaidServicesDatabase();
-
+            eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
             renderQuartersSelector();
             renderQuarterMonths(1);
             renderClubs();
             renderStaff();
+            renderMtbMainView();
+
+            await syncAllFromSupabase(false);
 
             document.getElementById('global-search').addEventListener('input', (e) => {
                 const q = e.target.value.toLowerCase().trim();
@@ -3750,898 +3512,5 @@ img { max-width: 100%; height: auto; }
             lucide.createIcons();
         });
     </script>
-<script>
-(function () {
-  const SB_URL = "https://wlqnbxuzsesbnmiaedwe.supabase.co";
-  const SB_KEY = "sb_publishable_dW0gq6KoMMJF1X3peM6KqA_P_yqIsz9";
-
-  const sb =
-    window.supabaseClient ||
-    (window.supabase && window.supabase.createClient
-      ? window.supabase.createClient(SB_URL, SB_KEY)
-      : null);
-
-  if (!sb) {
-    console.warn("Supabase клиенті табылмады.");
-    return;
-  }
-
-  window.supabaseClient = sb;
-
-  // 1. Құжатты / іс-шараны / МТБ паспортын 'documents' кестесіне сақтау
-  window.saveDocumentToSupabase = async function (docData = {}) {
-    const payload = {
-      title: String(docData.title || docData.name || "Құжат").trim(),
-      category: String(docData.category || docData.type || "general").trim(),
-      doc_date:
-        docData.doc_date ||
-        docData.date ||
-        new Date().toISOString().slice(0, 10),
-      content:
-        typeof docData.content === "string"
-          ? { html: docData.content, file_url: docData.file_url || "" }
-          : {
-              ...(docData.content || {}),
-              file_url: docData.file_url || (docData.content && docData.content.file_url) || ""
-            }
-    };
-
-    const { data, error } = await sb
-      .from("documents")
-      .insert([payload])
-      .select();
-
-    if (error) {
-      console.error("Supabase documents қатесі:", error);
-      return null;
-    }
-    console.log("Supabase documents кестесіне сақталды:", data);
-    return data && data[0] ? data[0] : true;
-  };
-
-  // 2. Қызметкерді 'employees' кестесіне сақтау
- window.saveEmployeeToSupabase = async function (empData = {}) {
-    try {
-      const fullName = String(
-        empData.full_name || empData.name || empData.fio || ""
-      ).trim();
-      const position = String(
-        empData.position || empData.role || empData.title || ""
-      ).trim();
-      const phone = String(empData.phone || empData.tel || "").trim();
-      const baseNotes =
-        typeof empData.notes === "string"
-          ? empData.notes.trim()
-          : String(empData.info || "").trim();
-
-      const extraEntries = Object.entries(empData || {}).filter(
-        ([k, v]) =>
-          !["full_name", "name", "fio", "position", "role", "title", "phone", "tel", "notes", "info"].includes(k) &&
-          String(v ?? "").trim() !== ""
-      );
-
-      const extraText = extraEntries.length
-        ? extraEntries.map(([k, v]) => `${k}: ${v}`).join(" | ")
-        : "";
-
-      const combinedNotes = [baseNotes, extraText].filter(Boolean).join(" — ");
-
-      const payload = {
-        full_name: fullName || "Аты-жөні көрсетілмеген",
-        position: position,
-        phone: phone,
-        notes: combinedNotes
-      };
-
-      const { data, error } = await sb
-        .from("employees")
-        .insert([payload])
-        .select();
-
-      if (error) {
-        console.error("Supabase 'employees' кестесіне сақтау қатесі:", error);
-        return null;
-      }
-
-      console.log("Supabase 'employees' кестесіне сақталды:", data);
-      return data && data[0] ? data[0] : true;
-    } catch (err) {
-      console.error("saveEmployeeToSupabase күтпеген қатесі:", err);
-      return null;
-    }
-  }; window.saveEmployeeToSupabase = async function (empData = {}) {
-    const payload = {
-      full_name: String(
-        empData.full_name || empData.name || empData.fio || ""
-      ).trim(),
-      position: String(
-        empData.position || empData.role || empData.title || ""
-      ).trim(),
-      phone: String(empData.phone || empData.tel || "").trim(),
-      notes: empData.notes || empData.info || "",
-      extra: empData
-    };
-
-    const { data, error } = await sb
-      .from("employees")
-      .insert([payload])
-      .select();
-
-    if (error) {
-      console.error("Supabase employees қатесі:", error);
-      return null;
-    }
-    console.log("Supabase employees кестесіне сақталды:", data);
-    return data && data[0] ? data[0] : true;
-  };
-
-  // 3. Базадан соңғы жазбаларды оқу
-  window.loadAllFromSupabase = async function () {
-    const [docsRes, empRes] = await Promise.all([
-      sb.from("documents").select("*").order("id", { ascending: false }),
-      sb.from("employees").select("*").order("id", { ascending: false })
-    ]);
-
-    if (docsRes.error) console.error("documents оқу қатесі:", docsRes.error);
-    if (empRes.error) console.error("employees оқу қатесі:", empRes.error);
-
-    window.__SUPA_CACHE__ = {
-      documents: docsRes.data || [],
-      employees: empRes.data || []
-    };
-(function bindSupabaseLoading() {
-  if (typeof window.loadAllFromSupabase !== 'function') return;
-
-  const originalLoadAll = window.loadAllFromSupabase;
-
-  function applySupaDataToUi(data) {
-    if (!data) return;
-    window.__SUPA_CACHE__ = data;
-
-    if (Array.isArray(data.employees) && typeof window.renderStaff === 'function') {
-      try { window.renderStaff(data.employees); } catch (_) {
-        try { window.renderStaff(); } catch (__) {}
-      }
-    }
-
-    if (typeof window.renderClubs === 'function') {
-      try { window.renderClubs(); } catch (_) {}
-    }
-
-    if (typeof window.renderQuartersSelector === 'function') {
-      try { window.renderQuartersSelector(); } catch (_) {}
-    }
-
-    if (typeof window.renderQuarterMonths === 'function') {
-      try { window.renderQuarterMonths(); } catch (_) {}
-    }
-
-    if (typeof window.renderPaidServiceDocs === 'function') {
-      try { window.renderPaidServiceDocs(); } catch (_) {}
-    }
-  }
-
-  window.loadAllFromSupabase = async function (...args) {
-    const result = await originalLoadAll.apply(this, args);
-    const data = result || window.__SUPA_CACHE__;
-    applySupaDataToUi(data);
-    return result;
-  };
-
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      window.loadAllFromSupabase().catch(() => {});
-    }, 300);
-  });
-})();
-    return window.__SUPA_CACHE__;
-  };
-
-  // 4. Форма жіберілгенде немесе "Сақтау" батырмасы басылғанда автоматты түсу
-  function collectContainerData(container) {
-    if (!container) return {};
-    const result = {};
-    container.querySelectorAll("input, textarea, select").forEach((el, idx) => {
-      if (el.type === "password" || el.type === "file") return;
-      const key = el.name || el.id || `field_${idx}`;
-      result[key] = el.value;
-    });
-    return result;
-  }
-
-  function isEmployeeContext(el) {
-    const text = (
-      (el.closest("section, form, [id*='modal'], [class*='modal']")?.id || "") +
-      " " +
-      (el.closest("section, form, [id*='modal'], [class*='modal']")?.innerText || "")
-    ).toLowerCase();
-    return text.includes("қызметкер") || text.includes("staff") || text.includes("employee");
-  }
-
-  document.addEventListener(
-    "submit",
-    async (e) => {
-      const form = e.target;
-      if (!form || form.closest("#auth-lock-screen")) return;
-      const values = collectContainerData(form);
-      if (isEmployeeContext(form)) {
-        await window.saveEmployeeToSupabase(values);
-      } else {
-        await window.saveDocumentToSupabase({
-          title: values.title || values.name || values.eventTitle || "Жаңа жазба",
-          category: values.category || values.type || "form_entry",
-          content: values
-        });
-      }
-    },
-    true
-  );
-
-  document.addEventListener(
-    "click",
-    async (e) => {
-      const btn = e.target.closest("button");
-      if (!btn || btn.closest("#auth-lock-screen")) return;
-      const label = (btn.innerText || "").trim().toLowerCase();
-      if (!label.includes("сақтау") && !label.includes("қосу")) return;
-
-      const scope =
-        btn.closest("form, [role='dialog'], [id*='modal'], [class*='modal'], section") ||
-        document.body;
-      const values = collectContainerData(scope);
-
-      const hasAnyValue = Object.values(values).some((v) => String(v || "").trim() !== "");
-      if (!hasAnyValue && !label.includes("сақтау")) return;
-
-      if (isEmployeeContext(btn)) {
-        await window.saveEmployeeToSupabase(values);
-      } else if (label.includes("сақтау")) {
-        const activeTab = document.querySelector(".nav-btn.active")?.dataset?.tab || "document";
-        await window.saveDocumentToSupabase({
-          title:
-            values.title ||
-            values.name ||
-            document.querySelector("#mtb-main-view-sheet .mtb-doc-header")?.innerText?.trim() ||
-            `Жазба (${activeTab})`,
-          category: activeTab,
-          content: values
-        });
-      }
-    },
-    true
-  );
-
-  // Бет ашылғанда базадағы деректерді жүктеп алу
-  window.addEventListener("DOMContentLoaded", () => {
-    window.loadAllFromSupabase();
-  });
-})();
-</script>
-<script>
-(function () {
-  const SB_URL = "https://wlqnbxuzsesbnmiaedwe.supabase.co";
-  const SB_KEY = "sb_publishable_dW0gq6KoMMJF1X3peM6KqA_P_yqIsz9";
-
-  const sb =
-    window.supabaseClient ||
-    (window.supabase && window.supabase.createClient
-      ? window.supabase.createClient(SB_URL, SB_KEY)
-      : null);
-
-  if (!sb) {
-    console.error("Supabase клиенті табылмады. CDN скриптін тексеріңіз.");
-    return;
-  }
-
-  window.supabaseClient = sb;
-
-  // 1. Құжатты / іс-шараны / МТБ паспортын 'documents' кестесіне толық сақтау
-  window.saveDocumentToSupabase = async function (docData = {}) {
-    try {
-      const payload = {
-        title: String(docData.title || docData.name || "Құжат").trim(),
-        category: String(docData.category || docData.type || "general").trim(),
-        doc_date:
-          docData.doc_date ||
-          docData.date ||
-          new Date().toISOString().slice(0, 10),
-        content:
-          typeof docData.content === "string"
-            ? {
-                html: docData.content,
-                file_url: docData.file_url || ""
-              }
-            : {
-                ...(docData.content || {}),
-                file_url:
-                  docData.file_url ||
-                  (docData.content && docData.content.file_url) ||
-                  ""
-              }
-      };
-
-      const { data, error } = await sb
-        .from("documents")
-        .insert([payload])
-        .select();
-
-      if (error) {
-        console.error("Supabase 'documents' кестесіне сақтау қатесі:", error);
-        return null;
-      }
-
-      console.log("Supabase 'documents' кестесіне сақталды:", data);
-      return data && data[0] ? data[0] : true;
-    } catch (err) {
-      console.error("saveDocumentToSupabase күтпеген қатесі:", err);
-      return null;
-    }
-  };
-
-  // 2. Қызметкерді 'employees' кестесіне толық сақтау
-  window.saveEmployeeToSupabase = async function (empData = {}) {
-    try {
-      const fullName = String(
-        empData.full_name || empData.name || empData.fio || ""
-      ).trim();
-      const position = String(
-        empData.position || empData.role || empData.title || ""
-      ).trim();
-      const phone = String(empData.phone || empData.tel || "").trim();
-      const notes =
-        typeof empData.notes === "string"
-          ? empData.notes
-          : empData.info || "";
-
-      const payload = {
-        full_name: fullName || "Аты-жөні көрсетілмеген",
-        position: position,
-        phone: phone,
-        notes: notes,
-        extra: empData
-      };
-
-      const { data, error } = await sb
-        .from("employees")
-        .insert([payload])
-        .select();
-
-      if (error) {
-        console.error("Supabase 'employees' кестесіне сақтау қатесі:", error);
-        return null;
-      }
-
-      console.log("Supabase 'employees' кестесіне сақталды:", data);
-      return data && data[0] ? data[0] : true;
-    } catch (err) {
-      console.error("saveEmployeeToSupabase күтпеген қатесі:", err);
-      return null;
-    }
-  };
-
-  // 3. Базадан 'documents' және 'employees' жазбаларын толық оқу
-  window.loadAllFromSupabase = async function () {
-    try {
-      const [docsRes, empRes] = await Promise.all([
-        sb.from("documents").select("*").order("id", { ascending: false }),
-        sb.from("employees").select("*").order("id", { ascending: false })
-      ]);
-
-      if (docsRes.error) {
-        console.error("Supabase 'documents' оқу қатесі:", docsRes.error);
-      }
-      if (empRes.error) {
-        console.error("Supabase 'employees' оқу қатесі:", empRes.error);
-      }
-
-      window.__SUPA_CACHE__ = {
-        documents: docsRes.data || [],
-        employees: empRes.data || []
-      };
-
-      console.log("Supabase деректері жүктелді:", window.__SUPA_CACHE__);
-      return window.__SUPA_CACHE__;
-    } catch (err) {
-      console.error("loadAllFromSupabase күтпеген қатесі:", err);
-      return { documents: [], employees: [] };
-    }
-  };
-
-  // 4. Контейнердегі (форма немесе модальді терезе) өрістерді жинау
-  function collectContainerData(container) {
-    if (!container) return {};
-    const result = {};
-    container.querySelectorAll("input, textarea, select").forEach((el, idx) => {
-      if (el.type === "password" || el.type === "file") return;
-      const key = el.name || el.id || `field_${idx}`;
-      result[key] = el.value;
-    });
-
-    // Rich editor немесе МТБ парағы болса, мәтінін/HTML-ін қоса алу
-    const editorEl = container.querySelector(
-      "[contenteditable='true'], .rich-editor-area, #mtb-main-view-sheet"
-    );
-    if (editorEl) {
-      result.html = editorEl.innerHTML;
-      result.text = (editorEl.innerText || "").trim();
-    }
-
-    return result;
-  }
-
-  // Қызметкерге қатысты контекст екенін анықтау
-  function isEmployeeContext(el) {
-    const container = el.closest("section, form, [role='dialog'], [id*='modal'], [class*='modal']");
-    const idAndClass = ((container?.id || "") + " " + (container?.className || "")).toLowerCase();
-    const text = (container?.innerText || "").toLowerCase();
-    return (
-      idAndClass.includes("staff") ||
-      idAndClass.includes("employee") ||
-      text.includes("қызметкер")
-    );
-  }
-
-  // 5. Форма жіберілгенде автоматты сақтау
-  document.addEventListener(
-    "submit",
-    async (e) => {
-      const form = e.target;
-      if (!form || form.closest("#auth-lock-screen")) return;
-
-      const values = collectContainerData(form);
-      if (isEmployeeContext(form)) {
-        await window.saveEmployeeToSupabase(values);
-      } else {
-        await window.saveDocumentToSupabase({
-          title:
-            values.title ||
-            values.name ||
-            values.eventTitle ||
-            values.docTitle ||
-            "Жаңа жазба",
-          category: values.category || values.type || "form_entry",
-          doc_date: values.doc_date || values.date,
-          content: values
-        });
-      }
-    },
-    true
-  );
-
-  // 6. "Сақтау" немесе "Қосу" батырмасы басылғанда автоматты сақтау
-  document.addEventListener(
-    "click",
-    async (e) => {
-      const btn = e.target.closest("button");
-      if (!btn || btn.closest("#auth-lock-screen")) return;
-
-      const label = (btn.innerText || "").trim().toLowerCase();
-      const isSave = label.includes("сақтау");
-      const isAdd = label.includes("қосу");
-      if (!isSave && !isAdd) return;
-
-      const scope =
-        btn.closest("form, [role='dialog'], [id*='modal'], [class*='modal'], section") ||
-        document.body;
-      const values = collectContainerData(scope);
-
-      const hasAnyValue = Object.values(values).some(
-        (v) => String(v || "").trim() !== ""
-      );
-      if (!hasAnyValue && !isSave) return;
-
-      if (isEmployeeContext(btn)) {
-        await window.saveEmployeeToSupabase(values);
-      } else if (isSave) {
-        const activeTab =
-          document.querySelector(".nav-btn.active")?.dataset?.tab || "document";
-        const docTitle =
-          values.title ||
-          values.name ||
-          document
-            .querySelector("#mtb-main-view-sheet .mtb-doc-header")
-            ?.innerText?.trim() ||
-          `Жазба (${activeTab})`;
-
-        await window.saveDocumentToSupabase({
-          title: docTitle,
-          category: values.category || activeTab,
-          doc_date: values.doc_date || values.date,
-          content: values
-        });
-      }
-    },
-    true
-  );
-
-  // 7. Бет ашылғанда базадағы деректерді жүктеу
-  window.addEventListener("DOMContentLoaded", () => {
-    window.loadAllFromSupabase();
-  });
-})();
-</script>
-<script src="js/config.js"></script>
-<script src="supabase-sync.js"></script>
-<script>
-(function () {
-  const sb = window.supabaseClient;
-  const BUCKET_NAME = "club-files";
-  if (!sb) return;
-
-  // PDF файлды Supabase Storage-ке жүктеу және сілтемесін алу
-  async function uploadPdfToStorage(file, folder) {
-    const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.pdf`;
-    const filePath = `${folder}/${safeName}`;
-
-    const { error: uploadError } = await sb.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        contentType: "application/pdf",
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error("Storage жүктеу қатесі:", uploadError);
-      showToast("PDF файлды бұлтқа жүктеу кезінде қате шықты!");
-      return null;
-    }
-
-    const { data } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-    return {
-      publicUrl: data.publicUrl,
-      storagePath: filePath
-    };
-  }
-
-  // Storage-тен файлды өшіру
-  async function deletePdfFromStorage(storagePath) {
-    if (!storagePath) return;
-    await sb.storage.from(BUCKET_NAME).remove([storagePath]);
-  }
-
-  // Барлық PDF тізімін Supabase-тен жүктеу
-  let cloudPdfCache = {
-    club: [],
-    staff: [],
-    paid: []
-  };
-
-  async function fetchCloudPdfs() {
-    const { data, error } = await sb
-      .from("documents")
-      .select("*")
-      .in("category", ["club_pdf", "staff_pdf", "paid_pdf"])
-      .order("id", { ascending: false });
-
-    if (error) {
-      console.error("Cloud PDF оқу қатесі:", error);
-      return;
-    }
-
-    cloudPdfCache = { club: [], staff: [], paid: [] };
-    (data || []).forEach((row) => {
-      const item = {
-        id: row.id,
-        ...(row.content || {}),
-        docTitle: row.title
-      };
-      if (row.category === "club_pdf") cloudPdfCache.club.push(item);
-      if (row.category === "staff_pdf") cloudPdfCache.staff.push(item);
-      if (row.category === "paid_pdf") cloudPdfCache.paid.push(item);
-    });
-
-    updateCloudClubCounts();
-    updateCloudStaffCounts();
-    if (typeof window.renderPaidServiceDocs === "function") {
-      window.renderPaidServiceDocs();
-    }
-  }
-
-  // ==================== 1. ҮЙІРМЕЛЕР PDF (SUPABASE STORAGE) ====================
-  function updateCloudClubCounts() {
-    const counts = {};
-    cloudPdfCache.club.forEach((item) => {
-      const sec = item.section || "plan";
-      if (!counts[item.clubId]) counts[item.clubId] = { total: 0 };
-      counts[item.clubId].total += 1;
-      counts[item.clubId][sec] = (counts[item.clubId][sec] || 0) + 1;
-    });
-    window.clubDocCounts = counts;
-    if (typeof window.renderClubs === "function") window.renderClubs();
-    if (typeof window.updateClubSectionTabBadges === "function" && window.currentClubId) {
-      window.updateClubSectionTabBadges();
-    }
-  }
-
-  window.handleClubPdfUpload = async function (e) {
-    e.preventDefault();
-    if (!window.currentClubId) return;
-    const titleInp = document.getElementById("club-doc-title");
-    const fileInp = document.getElementById("club-doc-file");
-    const docTitle = titleInp.value.trim();
-    const file = fileInp.files[0];
-    if (!docTitle || !file) return;
-
-    showToast("PDF бұлттық базаға жүктелуде...");
-    const uploaded = await uploadPdfToStorage(file, `clubs/club_${window.currentClubId}`);
-    if (!uploaded) return;
-
-    const { error } = await sb.from("documents").insert([{
-      title: docTitle,
-      category: "club_pdf",
-      doc_date: new Date().toISOString().slice(0, 10),
-      content: {
-        clubId: window.currentClubId,
-        section: window.currentClubSection || "plan",
-        docTitle,
-        fileName: file.name,
-        fileUrl: uploaded.publicUrl,
-        storagePath: uploaded.storagePath
-      }
-    }]);
-
-    if (!error) {
-      titleInp.value = "";
-      fileInp.value = "";
-      await fetchCloudPdfs();
-      await window.renderClubModalDocs();
-      showToast("PDF барлық аккаунттарға ортақ болып сақталды!");
-    }
-  };
-
-  window.renderClubModalDocs = async function () {
-    const docs = cloudPdfCache.club.filter(
-      (d) => Number(d.clubId) === Number(window.currentClubId) &&
-             (d.section || "plan") === window.currentClubSection
-    );
-    const badge = document.getElementById("club-docs-count-badge");
-    if (badge) badge.textContent = `${docs.length} құжат`;
-
-    const listEl = document.getElementById("club-docs-list");
-    if (!listEl) return;
-
-    if (docs.length === 0) {
-      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Бұл бөлімде әзірге PDF құжат жоқ.</div>`;
-      return;
-    }
-
-    listEl.innerHTML = docs.map((d) => `
-      <div class="p-3 rounded-xl border ${window.currentViewingClubDocId === d.id ? "border-brand-teal bg-brand-cream/70" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
-        <div onclick="previewClubDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-        </div>
-        <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="previewClubDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
-          <button type="button" onclick="deleteClubDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-        </div>
-      </div>
-    `).join("");
-    lucide.createIcons();
-  };
-
-  window.previewClubDocById = function (docId) {
-    const doc = cloudPdfCache.club.find((d) => d.id === docId);
-    if (!doc || !doc.fileUrl) return;
-    window.currentViewingClubPdfUrl = doc.fileUrl;
-    window.currentViewingClubPdfDoc = doc;
-    window.currentViewingClubDocId = doc.id;
-    document.getElementById("club-pdf-viewer-title").textContent = doc.docTitle;
-    document.getElementById("club-pdf-iframe").src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
-    document.getElementById("club-pdf-empty-state").classList.add("hidden");
-    document.getElementById("club-pdf-viewer-box").classList.remove("hidden");
-    window.renderClubModalDocs();
-  };
-
-  window.deleteClubDocById = async function (docId) {
-    if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-    const doc = cloudPdfCache.club.find((d) => d.id === docId);
-    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
-    await sb.from("documents").delete().eq("id", docId);
-    if (window.currentViewingClubDocId === docId && typeof window.resetClubPdfViewer === "function") {
-      window.resetClubPdfViewer();
-    }
-    await fetchCloudPdfs();
-    await window.renderClubModalDocs();
-    showToast("PDF құжат өшірілді!");
-  };
-
-  // ==================== 2. ҚЫЗМЕТКЕРЛЕР PDF (SUPABASE STORAGE) ====================
-  function updateCloudStaffCounts() {
-    const counts = {};
-    cloudPdfCache.staff.forEach((item) => {
-      counts[item.staffId] = (counts[item.staffId] || 0) + 1;
-    });
-    window.staffDocCounts = counts;
-    if (typeof window.renderStaff === "function") window.renderStaff();
-  }
-
-  window.handleStaffPdfUpload = async function (e) {
-    e.preventDefault();
-    if (!window.currentStaffId) return;
-    const titleInp = document.getElementById("staff-doc-title");
-    const fileInp = document.getElementById("staff-doc-file");
-    const docTitle = titleInp.value.trim();
-    const file = fileInp.files[0];
-    if (!docTitle || !file) return;
-
-    showToast("Қызметкер құжаты жүктелуде...");
-    const uploaded = await uploadPdfToStorage(file, `staff/staff_${window.currentStaffId}`);
-    if (!uploaded) return;
-
-    const { error } = await sb.from("documents").insert([{
-      title: docTitle,
-      category: "staff_pdf",
-      doc_date: new Date().toISOString().slice(0, 10),
-      content: {
-        staffId: window.currentStaffId,
-        docTitle,
-        fileName: file.name,
-        fileUrl: uploaded.publicUrl,
-        storagePath: uploaded.storagePath
-      }
-    }]);
-
-    if (!error) {
-      titleInp.value = "";
-      fileInp.value = "";
-      await fetchCloudPdfs();
-      await window.renderStaffModalDocs();
-      showToast("Қызметкер құжаты ортақ базаға сақталды!");
-    }
-  };
-
-  window.renderStaffModalDocs = async function () {
-    const docs = cloudPdfCache.staff.filter(
-      (d) => Number(d.staffId) === Number(window.currentStaffId)
-    );
-    const badge = document.getElementById("staff-docs-count-badge");
-    if (badge) badge.textContent = `${docs.length} құжат`;
-
-    const listEl = document.getElementById("staff-docs-list");
-    if (!listEl) return;
-
-    if (docs.length === 0) {
-      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
-      return;
-    }
-
-    listEl.innerHTML = docs.map((d) => `
-      <div class="p-3 rounded-xl border ${window.currentViewingDocId === d.id ? "border-brand-teal bg-brand-cream/70" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
-        <div onclick="previewStaffDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-        </div>
-        <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="previewStaffDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
-          <button type="button" onclick="deleteStaffDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-        </div>
-      </div>
-    `).join("");
-    lucide.createIcons();
-  };
-
-  window.previewStaffDocById = function (docId) {
-    const doc = cloudPdfCache.staff.find((d) => d.id === docId);
-    if (!doc || !doc.fileUrl) return;
-    window.currentViewingPdfUrl = doc.fileUrl;
-    window.currentViewingPdfDoc = doc;
-    window.currentViewingDocId = doc.id;
-    document.getElementById("staff-pdf-viewer-title").textContent = doc.docTitle;
-    document.getElementById("staff-pdf-iframe").src = doc.fileUrl;
-    document.getElementById("staff-pdf-empty-state").classList.add("hidden");
-    document.getElementById("staff-pdf-viewer-box").classList.remove("hidden");
-    window.renderStaffModalDocs();
-  };
-
-  window.deleteStaffDocById = async function (docId) {
-    if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-    const doc = cloudPdfCache.staff.find((d) => d.id === docId);
-    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
-    await sb.from("documents").delete().eq("id", docId);
-    if (window.currentViewingDocId === docId && typeof window.resetStaffPdfViewer === "function") {
-      window.resetStaffPdfViewer();
-    }
-    await fetchCloudPdfs();
-    await window.renderStaffModalDocs();
-    showToast("Құжат өшірілді!");
-  };
-
-  // ==================== 3. АҚЫЛЫ ҚЫЗМЕТ PDF (SUPABASE STORAGE) ====================
-  window.handlePaidServicePdfUpload = async function (e) {
-    e.preventDefault();
-    const titleInp = document.getElementById("paid-doc-title");
-    const fileInp = document.getElementById("paid-doc-file");
-    const docTitle = titleInp.value.trim();
-    const file = fileInp.files[0];
-    if (!docTitle || !file) return;
-
-    showToast("Альбомдық PDF бұлтқа жүктелуде...");
-    const uploaded = await uploadPdfToStorage(file, "paid_services");
-    if (!uploaded) return;
-
-    const { data, error } = await sb.from("documents").insert([{
-      title: docTitle,
-      category: "paid_pdf",
-      doc_date: new Date().toISOString().slice(0, 10),
-      content: {
-        docTitle,
-        fileName: file.name,
-        orientation: "landscape",
-        fileUrl: uploaded.publicUrl,
-        storagePath: uploaded.storagePath
-      }
-    }]).select();
-
-    if (!error) {
-      titleInp.value = "";
-      fileInp.value = "";
-      await fetchCloudPdfs();
-      if (data && data[0]) window.previewPaidDocById(data[0].id);
-      showToast("Альбомдық PDF ортақ базаға сақталды!");
-    }
-  };
-
-  window.renderPaidServiceDocs = async function () {
-    const docs = cloudPdfCache.paid;
-    const badge = document.getElementById("paid-docs-count-badge");
-    if (badge) badge.textContent = `${docs.length} құжат`;
-
-    const listEl = document.getElementById("paid-docs-list");
-    if (!listEl) return;
-
-    if (docs.length === 0) {
-      listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500 bg-white">Ақылы қызмет бойынша альбомдық PDF құжаттар әзірге жоқ.</div>`;
-      return;
-    }
-
-    listEl.innerHTML = docs.map((d) => `
-      <div class="p-3 rounded-xl border ${window.currentViewingPaidDocId === d.id ? "border-brand-teal bg-brand-cream/80" : "border-slate-200 bg-white"} hover:border-brand-teal transition flex items-center justify-between gap-2">
-        <div onclick="previewPaidDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-          <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-          <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span>
-        </div>
-        <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer">Ашу</button>
-          <button type="button" onclick="deletePaidDocById(${d.id})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-        </div>
-      </div>
-    `).join("");
-    lucide.createIcons();
-  };
-
-  window.previewPaidDocById = function (docId) {
-    const doc = cloudPdfCache.paid.find((d) => d.id === docId);
-    if (!doc || !doc.fileUrl) return;
-    window.currentViewingPaidPdfUrl = doc.fileUrl;
-    window.currentViewingPaidPdfDoc = doc;
-    window.currentViewingPaidDocId = doc.id;
-    document.getElementById("paid-pdf-viewer-title").textContent = `${doc.docTitle} (Альбомдық PDF)`;
-    document.getElementById("paid-fs-title").textContent = `${doc.docTitle} (Альбомдық PDF)`;
-    document.getElementById("paid-pdf-iframe").src = doc.fileUrl;
-    document.getElementById("paid-fs-iframe").src = doc.fileUrl;
-    document.getElementById("paid-pdf-empty-state").classList.add("hidden");
-    document.getElementById("paid-pdf-viewer-box").classList.remove("hidden");
-    window.renderPaidServiceDocs();
-  };
-
-  window.deletePaidDocById = async function (docId) {
-    if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-    const doc = cloudPdfCache.paid.find((d) => d.id === docId);
-    if (doc && doc.storagePath) await deletePdfFromStorage(doc.storagePath);
-    await sb.from("documents").delete().eq("id", docId);
-    if (window.currentViewingPaidDocId === docId && typeof window.resetPaidPdfViewer === "function") {
-      window.resetPaidPdfViewer();
-    }
-    await fetchCloudPdfs();
-    showToast("PDF құжат өшірілді!");
-  };
-
-  // Бет ашылғанда барлық PDF тізімін жүктеу
-  window.addEventListener("load", () => {
-    setTimeout(fetchCloudPdfs, 700);
-  });
-})();
-</script></body>
+</body>
 </html>
-
