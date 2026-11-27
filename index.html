@@ -44,6 +44,11 @@
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-opacity='0.14' stroke-width='1.5'%3E%3Cpath d='M30 5 L38 17 L52 15 L45 28 L55 38 L41 42 L38 56 L30 46 L22 56 L19 42 L5 38 L15 28 L8 15 L22 17 Z'/%3E%3Ccircle cx='30' cy='30' r='6'/%3E%3C/g%3E%3C/svg%3E");
         }
 
+        /* ӘКІМШІ ЕМЕС ҚОЛДАНУШЫЛАР ҮШІН ӨҢДЕУ БАТЫРМАЛАРЫН АВТОМАТТЫ ЖАСЫРУ */
+        body:not(.is-admin) .admin-only {
+            display: none !important;
+        }
+
         @keyframes shakeError {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-8px); }
@@ -445,21 +450,30 @@
 </head>
 <body class="bg-brand-cream text-slate-800 min-h-screen flex flex-col">
 
-    <!-- ҚҰПИЯСӨЗБЕН ҚҰЛЫПТАУ ЭКРАНЫ (1984@) -->
-    <div id="auth-lock-screen" class="fixed inset-0 z-[200] kazakh-pattern-bg flex items-center justify-center p-4">
+    <!-- ӘКІМШІ РЕТІНДЕ КІРУ МОДАЛЬДЫ ТЕРЕЗЕСІ (1984@) -->
+    <div id="admin-login-modal" class="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
         <div id="auth-card" class="w-full max-w-md bg-white rounded-3xl border-2 border-brand-gold shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-brand-tealDark via-brand-teal to-brand-tealDark px-6 py-6 text-center border-b-2 border-brand-gold">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-gold/20 border-2 border-brand-gold flex items-center justify-center mb-3 shadow-inner">
-                    <i data-lucide="lock" class="w-8 h-8 text-brand-gold"></i>
+            <div class="bg-gradient-to-r from-brand-tealDark via-brand-teal to-brand-tealDark px-6 py-5 flex items-center justify-between border-b-2 border-brand-gold">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-brand-gold/20 border border-brand-gold flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-brand-gold"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase tracking-widest text-brand-gold font-bold block">Өзгерту құқығы</span>
+                        <h2 class="text-base sm:text-lg font-extrabold text-white">Әкімші ретінде кіру</h2>
+                    </div>
                 </div>
-                <span class="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold block">Қорғалған кіру</span>
-                <h2 class="text-lg sm:text-xl font-extrabold text-white mt-1 leading-snug">«Жаңақұрылыс ауылдық клубы» КМҚК</h2>
-                <p class="text-xs text-slate-200 mt-1">Платформаға кіру үшін құпиясөзді теріңіз</p>
+                <button type="button" onclick="closeAdminLoginModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-600 text-white flex items-center justify-center cursor-pointer transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
 
-            <form onsubmit="handleUnlockPlatform(event)" class="p-6 space-y-4">
+            <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Құжаттарды жүктеу, өңдеу, жаңа іс-шара қосу және өшіру үшін әкімші құпиясөзін енгізіңіз. Басқа қолданушылар құжаттарды тек көріп, жүктей алады.
+                </p>
                 <div>
-                    <label for="platform-password-input" class="block text-xs font-extrabold text-slate-700 mb-1.5">Құпиясөз *</label>
+                    <label for="platform-password-input" class="block text-xs font-extrabold text-slate-700 mb-1.5">Әкімші құпиясөзі *</label>
                     <div class="relative">
                         <input
                             type="password"
@@ -484,13 +498,22 @@
                     </p>
                 </div>
 
-                <button
-                    type="submit"
-                    class="w-full py-3 px-4 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition"
-                >
-                    <i data-lucide="key-round" class="w-4 h-4 text-brand-gold"></i>
-                    <span>Платформаны ашу</span>
-                </button>
+                <div class="flex gap-2 pt-1">
+                    <button
+                        type="button"
+                        onclick="closeAdminLoginModal()"
+                        class="w-1/3 py-3 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm cursor-pointer transition"
+                    >
+                        Бас тарту
+                    </button>
+                    <button
+                        type="submit"
+                        class="w-2/3 py-3 px-4 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition"
+                    >
+                        <i data-lucide="key-round" class="w-4 h-4 text-brand-gold"></i>
+                        <span>Әкімші режимін ашу</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -511,11 +534,11 @@
                         <i data-lucide="landmark" class="w-6 h-6 text-brand-gold"></i>
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <span class="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold">Мәдениет ошағының цифрлық порталы</span>
-                            <span id="cloud-sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-[10px] font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span>Ортақ база қосулы</span>
+                            <span id="role-status-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/25 border border-sky-300/50 text-sky-100 text-[10px] font-bold">
+                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                <span>Тек көру режимі</span>
                             </span>
                         </div>
                         <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight text-white">«Жаңақұрылыс ауылдық клубы» КМҚК</h1>
@@ -547,9 +570,15 @@
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Жаңарту</span>
                     </button>
-                    <button type="button" onclick="lockPlatform()" title="Порталды құлыптау" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer bg-rose-600/85 hover:bg-rose-600 text-white shadow">
-                        <i data-lucide="lock" class="w-4 h-4"></i>
-                        <span>Құлыптау</span>
+
+                    <!-- ӘКІМШІ КІРУ / ШЫҒУ БАТЫРМАСЫ -->
+                    <button id="btn-open-admin-login" type="button" onclick="openAdminLoginModal()" title="Өзгерту үшін әкімші ретінде кіру" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition cursor-pointer bg-amber-500 hover:bg-amber-400 text-brand-tealDark shadow">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>Әкімші кіруі</span>
+                    </button>
+                    <button id="btn-logout-admin" type="button" onclick="logoutAdmin()" title="Әкімші режимінен шығу" class="hidden flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer bg-rose-600 hover:bg-rose-700 text-white shadow">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Админнен шығу</span>
                     </button>
                 </nav>
             </div>
@@ -580,11 +609,11 @@
                             <input type="text" id="global-search" placeholder="Іс-шара немесе ай іздеу..."
                                 class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-brand-cream/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold text-sm transition">
                         </div>
-                        <button type="button" onclick="openAddEventModal()" class="px-4 py-2 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
+                        <button type="button" onclick="openAddEventModal()" class="admin-only px-4 py-2 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
                             <i data-lucide="plus-circle" class="w-4 h-4 text-brand-gold"></i>
                             <span>Шара қосу</span>
                         </button>
-                        <button type="button" onclick="resetAllData()" title="Тізімді бастапқы күйге келтіру" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition">
+                        <button type="button" onclick="resetAllData()" title="Тізімді бастапқы күйге келтіру" class="admin-only px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition">
                             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                             <span class="hidden sm:inline">Қалпына келтіру</span>
                         </button>
@@ -610,7 +639,7 @@
         <section id="section-staff" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-6 shadow-md border border-brand-gold/30">
                 <h2 class="text-xl sm:text-2xl font-extrabold text-brand-teal mb-1">Клуб қызметкерлері және жеке іс қағаздары</h2>
-                <p class="text-sm text-slate-500 mb-6">Қызметкерді таңдап, оның жеке іс қағаздарын (PDF) жүктеңіз, қараңыз, өзгертіңіз немесе жүктеп алыңыз.</p>
+                <p class="text-sm text-slate-500 mb-6">Қызметкерді таңдап, оның жеке іс қағаздарын (PDF) қараңыз немесе жүктеп алыңыз.</p>
                 <div id="staff-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
         </section>
@@ -620,16 +649,16 @@
             <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-brand-gold/30 space-y-5">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-extrabold text-brand-teal">Материалдық-техникалық база </h2>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-brand-teal">Материалдық-техникалық база (Альбомдық парақ)</h2>
                         <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                            Мәліметтерді тікелей осы альбомдық парақта өзгертіп сақтауға, Word (.docx) жүктеуге, .doc экспорттауға немесе басып шығаруға болады.
+                            Клубтың материалдық-техникалық базасы туралы толық мәліметтер паспорты.
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <button type="button" onclick="toggleMtbMainEdit()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
+                        <button type="button" onclick="toggleMtbMainEdit()" class="admin-only px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
                             <i data-lucide="edit-3" class="w-4 h-4"></i> Өзгерту
                         </button>
-                        <button type="button" onclick="triggerMtbWordUpload()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
+                        <button type="button" onclick="triggerMtbWordUpload()" class="admin-only px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
                             <i data-lucide="folder-up" class="w-4 h-4"></i> Word (.docx) жүктеу
                         </button>
                         <button type="button" onclick="exportMtbToWord()" class="px-3.5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
@@ -678,13 +707,13 @@
                 <div class="border-b border-slate-100 pb-4">
                     <h2 class="text-xl sm:text-2xl font-extrabold text-brand-teal">Ақылы қызмет (Альбомдық PDF құжаттар)</h2>
                     <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                        Ақылы қызметке қатысты альбомдық бағыттағы PDF құжаттарды жүктеңіз, көлденең (альбомдық) терезеде қараңыз және жүктеп алыңыз.
+                        Ақылы қызметке қатысты альбомдық бағыттағы PDF құжаттарды көлденең (альбомдық) терезеде қараңыз және жүктеп алыңыз.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     <div class="lg:col-span-4 space-y-4">
-                        <form onsubmit="handlePaidServicePdfUpload(event)" class="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
+                        <form onsubmit="handlePaidServicePdfUpload(event)" class="admin-only bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
                             <div class="text-sm font-extrabold text-brand-teal flex items-center gap-2">
                                 <i data-lucide="file-up" class="w-4 h-4 text-brand-gold"></i> Альбомдық PDF құжат қосу
                             </div>
@@ -706,7 +735,7 @@
                         <div id="paid-pdf-empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-300 rounded-2xl bg-white/85 min-h-[440px]">
                             <i data-lucide="file-spreadsheet" class="w-11 h-11 text-slate-400 mb-2"></i>
                             <h4 class="text-base font-extrabold text-slate-800">Альбомдық PDF қарау аймағы</h4>
-                            <p class="text-xs text-slate-500 mt-1 max-w-sm">Сол жақтан PDF құжат жүктеңіз немесе тізімнен таңдаңыз — құжат альбомдық (көлденең) форматта ашылады.</p>
+                            <p class="text-xs text-slate-500 mt-1 max-w-sm">Сол жақтағы тізімнен құжат таңдаңыз — құжат альбомдық (көлденең) форматта ашылады.</p>
                         </div>
 
                         <div id="paid-pdf-viewer-box" class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-300 shadow-sm overflow-hidden hidden">
@@ -744,7 +773,7 @@
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 mb-0.5">
                         <span id="modal-event-date-badge" class="px-2.5 py-0.5 rounded-full bg-brand-gold text-brand-tealDark text-[11px] font-extrabold"></span>
-                        <span class="text-[11px] text-brand-gold font-semibold hidden sm:inline">Word үлгісіндегі тізбектелген A4 парақтар (Ортақ база)</span>
+                        <span class="text-[11px] text-brand-gold font-semibold hidden sm:inline">Word үлгісіндегі тізбектелген A4 парақтар</span>
                     </div>
                     <h3 id="modal-event-title" class="text-base sm:text-xl font-extrabold text-white truncate"></h3>
                 </div>
@@ -931,7 +960,7 @@
                         <span id="club-modal-desc"></span>
                     </div>
 
-                    <form onsubmit="handleClubPdfUpload(event)" class="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
+                    <form onsubmit="handleClubPdfUpload(event)" class="admin-only bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
                         <div id="club-upload-form-title" class="text-sm font-extrabold text-brand-teal flex items-center gap-2">
                             <i data-lucide="file-up" class="w-4 h-4 text-brand-gold"></i> Жаңа PDF құжат жүктеу
                         </div>
@@ -1182,7 +1211,7 @@
                         <span id="staff-modal-resp"></span>
                     </div>
 
-                    <form onsubmit="handleStaffPdfUpload(event)" class="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
+                    <form onsubmit="handleStaffPdfUpload(event)" class="admin-only bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-brand-teal/40 space-y-3">
                         <div class="text-sm font-extrabold text-brand-teal flex items-center gap-2">
                             <i data-lucide="file-up" class="w-4 h-4 text-brand-gold"></i> Жаңа PDF құжат жүктеу
                         </div>
@@ -1247,31 +1276,71 @@
         </div>
     </div>
 
-    <!-- НЕГІЗГІ БІРТҰТАС JAVASCRIPT (SUPABASE ОРТАҚ БАЗАСЫМЕН ТОЛЫҚ СИНХРОНДАЛҒАН) -->
+    <!-- НЕГІЗГІ JAVASCRIPT -->
     <script>
         const sb = window.supabaseClient;
         const BUCKET_NAME = "club-files";
 
-        // ==================== ҚҰПИЯСӨЗБЕН ҚҰЛЫПТАУ ЖҮЙЕСІ (1984@) ====================
+        // ==================== РӨЛДЕР ЖҮЙЕСІ: ӘКІМШІ (1984@) ЖӘНЕ КӨРЕРМЕН ====================
         const PLATFORM_PASS = '1984@';
-        const AUTH_SESSION_KEY = 'zhanakurylys_portal_unlocked_v1';
+        const ADMIN_SESSION_KEY = 'zhanakurylys_admin_mode_v1';
+        let isAdminMode = false;
 
-        function checkPlatformLockState() {
-            const lockScreen = document.getElementById('auth-lock-screen');
-            if (!lockScreen) return;
-            if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'true') {
-                lockScreen.classList.add('hidden');
-            } else {
-                lockScreen.classList.remove('hidden');
-                const inp = document.getElementById('platform-password-input');
-                if (inp) {
-                    inp.value = '';
-                    setTimeout(() => inp.focus(), 80);
+        function applyRoleUIState() {
+            isAdminMode = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+            document.body.classList.toggle('is-admin', isAdminMode);
+
+            const badge = document.getElementById('role-status-badge');
+            const btnLogin = document.getElementById('btn-open-admin-login');
+            const btnLogout = document.getElementById('btn-logout-admin');
+
+            if (isAdminMode) {
+                if (badge) {
+                    badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/60 text-emerald-200 text-[10px] font-bold';
+                    badge.innerHTML = `<i data-lucide="shield-check" class="w-3 h-3"></i><span>Әкімші режимі (Өзгерту ашық)</span>`;
                 }
+                if (btnLogin) btnLogin.classList.add('hidden');
+                if (btnLogout) btnLogout.classList.remove('hidden');
+            } else {
+                if (badge) {
+                    badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/25 border border-sky-300/50 text-sky-100 text-[10px] font-bold';
+                    badge.innerHTML = `<i data-lucide="eye" class="w-3 h-3"></i><span>Тек көру режимі</span>`;
+                }
+                if (btnLogin) btnLogin.classList.remove('hidden');
+                if (btnLogout) btnLogout.classList.add('hidden');
             }
+            lucide.createIcons();
         }
 
-        function handleUnlockPlatform(e) {
+        function ensureAdminAccess() {
+            if (!isAdminMode) {
+                showToast("Бұл әрекет тек Әкімшіге рұқсат етілген! Жоғарыдан «Әкімші кіруі» батырмасын басыңыз.");
+                openAdminLoginModal();
+                return false;
+            }
+            return true;
+        }
+
+        function openAdminLoginModal() {
+            const modal = document.getElementById('admin-login-modal');
+            const inp = document.getElementById('platform-password-input');
+            const errEl = document.getElementById('auth-error-msg');
+            if (!modal) return;
+            errEl.classList.add('hidden');
+            modal.classList.remove('hidden');
+            if (inp) {
+                inp.value = '';
+                setTimeout(() => inp.focus(), 80);
+            }
+            lucide.createIcons();
+        }
+
+        function closeAdminLoginModal() {
+            const modal = document.getElementById('admin-login-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
             e.preventDefault();
             const inp = document.getElementById('platform-password-input');
             const errEl = document.getElementById('auth-error-msg');
@@ -1279,10 +1348,11 @@
             if (!inp) return;
 
             if (inp.value === PLATFORM_PASS) {
-                sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+                sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
                 errEl.classList.add('hidden');
-                document.getElementById('auth-lock-screen').classList.add('hidden');
-                showToast("Портал сәтті ашылды!");
+                closeAdminLoginModal();
+                applyRoleUIState();
+                showToast("Әкімші режимі қосылды! Енді құжаттарды өзгерте аласыз.");
             } else {
                 errEl.classList.remove('hidden');
                 card.classList.remove('shake-error');
@@ -1292,10 +1362,10 @@
             }
         }
 
-        function lockPlatform() {
-            sessionStorage.removeItem(AUTH_SESSION_KEY);
-            checkPlatformLockState();
-            lucide.createIcons();
+        function logoutAdmin() {
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
+            applyRoleUIState();
+            showToast("Әкімші режимінен шықтыңыз. Қазір тек көру режимі.");
         }
 
         function toggleAuthPasswordVisibility() {
@@ -1405,7 +1475,7 @@
             { id: 14, quarter: 2, month: 'Мамыр', title: '«7 мамыр - Отан қорғаушылар күні» және «9 мамыр – Жеңіс күні» мерекесіне орай «Жеңістің туы шарықта» атты ардагерлермен кездесу кеш', date: '08.05.2026', time: '15:00' },
             { id: 15, quarter: 2, month: 'Мамыр', title: 'Ақын Күләш Ахметованың 80 жылдығына орай «Жарық дүние» атты әдеби әуенді кеш', date: '22.05.2026', time: '15:00' },
             { id: 16, quarter: 2, month: 'Маусым', title: '«1 Маусым Халықаралық Балаларды қорғау күні» мерекесіне орай «Бақытты балалық шақ» мерекелік концерт', date: '01.06.2026', time: '11:00' },
-            { id: 17, quarter: 2, month: 'Маусым', title: '«4 маум - Рәміздер күні» мерекесіне орай «Рәміздер мақтанышым» атты танымдық кеш', date: '04.06.2026', time: '12:00' },
+            { id: 17, quarter: 2, month: 'Маусым', title: '«4 маусым - Рәміздер күні» мерекесіне орай «Рәміздер мақтанышым» атты танымдық кеш', date: '04.06.2026', time: '12:00' },
             { id: 18, quarter: 3, month: 'Шілде', title: 'Күйші, композитор Құрманғазы Сағырбайұлының туғанына 220 жыл толуына орай «Күй атасы - Құрманғазы» атты тақырыптық кеш', date: '03.07.2026', time: '16:00' },
             { id: 19, quarter: 3, month: 'Шілде', title: '«6 - шілде Астана күні» мерекесіне орай «Астана – арман қала» атты концерт', date: '06.07.2026', time: '16:00' },
             { id: 20, quarter: 3, month: 'Шілде', title: 'Діни экстремизмнің алдын-алу мақсатында «Имандылық әр адамның жүрегінде» атты дөңгелек үстел', date: '24.07.2026', time: '15:00' },
@@ -1450,12 +1520,11 @@
         let currentMtbHtml = DEFAULT_MTB_LANDSCAPE_HTML;
         let currentMtbRowId = null;
 
-        // Supabase Cloud PDF тізімі
         let cloudPdfCache = { club: [], staff: [], paid: [] };
         let clubDocCounts = {};
         let staffDocCounts = {};
 
-        // ==================== SUPABASE STORAGE ЖӘНЕ ОРТАҚ БАЗА ФУНКЦИЯЛАРЫ ====================
+        // ==================== SUPABASE STORAGE ЖӘНЕ ОРТАҚ БАЗА ====================
         async function uploadFileToStorage(file, folder, forcedExt = null) {
             const ext = forcedExt || (file.name.split('.').pop() || 'bin').toLowerCase();
             const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
@@ -1475,10 +1544,7 @@
             }
 
             const { data } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-            return {
-                publicUrl: data.publicUrl,
-                storagePath: filePath
-            };
+            return { publicUrl: data.publicUrl, storagePath: filePath };
         }
 
         async function deleteFileFromStorage(storagePath) {
@@ -1494,7 +1560,7 @@
         }
 
         async function saveEventToSupabase(ev) {
-            if (!sb || !ev) return;
+            if (!sb || !ev || !ensureAdminAccess()) return;
             const cleanObj = serializeEventForCloud(ev);
             const payload = {
                 title: ev.title,
@@ -1504,25 +1570,15 @@
             };
 
             if (ev._supaRowId) {
-                const { error } = await sb
-                    .from('documents')
-                    .update(payload)
-                    .eq('id', ev._supaRowId);
-                if (error) console.error("Іс-шараны жаңарту қатесі:", error);
+                await sb.from('documents').update(payload).eq('id', ev._supaRowId);
             } else {
-                const { data, error } = await sb
-                    .from('documents')
-                    .insert([payload])
-                    .select();
-                if (!error && data && data[0]) {
-                    ev._supaRowId = data[0].id;
-                } else if (error) {
-                    console.error("Іс-шараны сақтау қатесі:", error);
-                }
+                const { data, error } = await sb.from('documents').insert([payload]).select();
+                if (!error && data && data[0]) ev._supaRowId = data[0].id;
             }
         }
 
         async function saveMtbPassportToSupabase(html) {
+            if (!ensureAdminAccess()) return;
             currentMtbHtml = html;
             if (!sb) return;
             const payload = {
@@ -1533,21 +1589,10 @@
             };
 
             if (currentMtbRowId) {
-                const { error } = await sb
-                    .from('documents')
-                    .update(payload)
-                    .eq('id', currentMtbRowId);
-                if (error) console.error("МТБ жаңарту қатесі:", error);
+                await sb.from('documents').update(payload).eq('id', currentMtbRowId);
             } else {
-                const { data, error } = await sb
-                    .from('documents')
-                    .insert([payload])
-                    .select();
-                if (!error && data && data[0]) {
-                    currentMtbRowId = data[0].id;
-                } else if (error) {
-                    console.error("МТБ сақтау қатесі:", error);
-                }
+                const { data, error } = await sb.from('documents').insert([payload]).select();
+                if (!error && data && data[0]) currentMtbRowId = data[0].id;
             }
         }
 
@@ -1560,37 +1605,27 @@
                     .order('id', { ascending: true });
 
                 if (error) {
-                    console.error("Supabase оқу қатесі:", error);
                     if (showNotify) showToast("Ортақ базамен байланысу қатесі!");
                     return;
                 }
 
                 const rows = data || [];
-
-                // 1. Бастапқы 34 іс-шараны дайындау және Supabase-тегі жазбалармен біріктіру
                 const mergedMap = new Map();
                 DEFAULT_EVENTS.forEach(defEv => {
                     mergedMap.set(Number(defEv.id), { ...defEv, originalTitle: defEv.title });
                 });
 
-                const eventRows = rows.filter(r => r.category === 'annual_event');
-                eventRows.forEach(row => {
+                rows.filter(r => r.category === 'annual_event').forEach(row => {
                     const c = row.content || {};
                     const evId = Number(c.id);
                     if (evId) {
                         const existing = mergedMap.get(evId) || {};
-                        mergedMap.set(evId, {
-                            ...existing,
-                            ...c,
-                            id: evId,
-                            _supaRowId: row.id
-                        });
+                        mergedMap.set(evId, { ...existing, ...c, id: evId, _supaRowId: row.id });
                     }
                 });
 
                 eventsData = Array.from(mergedMap.values()).sort((a, b) => a.id - b.id);
 
-                // 2. МТБ паспортын жүктеу (ең соңғы жазба)
                 const mtbRows = rows.filter(r => r.category === 'mtb_passport');
                 if (mtbRows.length > 0) {
                     const latestMtb = mtbRows[mtbRows.length - 1];
@@ -1600,14 +1635,9 @@
                     }
                 }
 
-                // 3. Үйірме, Қызметкер, Ақылы қызмет PDF-терін жүктеу
                 cloudPdfCache = { club: [], staff: [], paid: [] };
                 rows.slice().reverse().forEach(row => {
-                    const item = {
-                        id: row.id,
-                        ...(row.content || {}),
-                        docTitle: row.title
-                    };
+                    const item = { id: row.id, ...(row.content || {}), docTitle: row.title };
                     if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
                     if (row.category === 'staff_pdf') cloudPdfCache.staff.push(item);
                     if (row.category === 'paid_pdf') cloudPdfCache.paid.push(item);
@@ -1617,11 +1647,9 @@
                 updateCloudStaffCounts();
                 renderQuartersSelector();
                 const searchVal = (document.getElementById('global-search')?.value || '').toLowerCase().trim();
-                if (searchVal) {
-                    renderSearchResults(searchVal);
-                } else {
-                    renderQuarterMonths(activeQuarter);
-                }
+                if (searchVal) renderSearchResults(searchVal);
+                else renderQuarterMonths(activeQuarter);
+
                 renderMtbMainView();
                 renderPaidServiceDocs();
 
@@ -1633,9 +1661,7 @@
                     }
                 }
 
-                if (showNotify) {
-                    showToast("Барлық құжаттар ортақ базадан сәтті жаңартылды!");
-                }
+                if (showNotify) showToast("Барлық құжаттар ортақ базадан жаңартылды!");
             } catch (err) {
                 console.error("Синхрондау қатесі:", err);
             }
@@ -1651,8 +1677,7 @@
                 ? raw
                 : raw.split('\n').map(l => `<div>${l ? escapeHtml(l) : '<br>'}</div>`).join('');
 
-            const blockedTags = ['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'form', 'input', 'textarea', 'select'];
-            blockedTags.forEach(tag => {
+            ['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'form', 'input', 'textarea', 'select'].forEach(tag => {
                 template.content.querySelectorAll(tag).forEach(el => el.remove());
             });
 
@@ -1669,11 +1694,10 @@
                     if (!isSafeImg) el.remove();
                 }
             });
-
             return template.innerHTML;
         }
 
-        // ==================== СУРЕТТЕРДІ ЖЫЛЖЫТУ ЖӘНЕ КІШІРЕЙТУ / ҮЛКЕЙТУ ====================
+        // ==================== СУРЕТТЕРДІ ЖЫЛЖЫТУ ЖӘНЕ КІШІРЕЙТУ ====================
         function createResizableImageWrapper(imgSrc, widthPx = 360) {
             const box = document.createElement('div');
             box.className = 'resizable-img-box';
@@ -1683,12 +1707,12 @@
             box.innerHTML = `
                 <div class="img-move-toolbar" contenteditable="false">
                     <span class="img-drag-grip" title="Ұстап тұрып жылжыту">✥ Жылжыту</span>
-                    <button type="button" data-img-action="left" title="Солға">⬅</button>
-                    <button type="button" data-img-action="center" title="Ортаға">⬌</button>
-                    <button type="button" data-img-action="right" title="Оңға">➡</button>
-                    <button type="button" data-img-action="smaller" title="Кішірейту">-10%</button>
-                    <button type="button" data-img-action="larger" title="Үлкейту">+10%</button>
-                    <button type="button" data-img-action="delete" title="Суретті өшіру" style="background:#e11d48;">✕</button>
+                    <button type="button" data-img-action="left">⬅</button>
+                    <button type="button" data-img-action="center">⬌</button>
+                    <button type="button" data-img-action="right">➡</button>
+                    <button type="button" data-img-action="smaller">-10%</button>
+                    <button type="button" data-img-action="larger">+10%</button>
+                    <button type="button" data-img-action="delete" style="background:#e11d48;">✕</button>
                 </div>
                 <img src="${imgSrc}" alt="Құжат суреті">
                 <span class="img-resize-handle nw" data-dir="nw"></span>
@@ -1701,8 +1725,7 @@
 
         function enhanceEditorImages(containerEl) {
             if (!containerEl) return;
-            const imgs = Array.from(containerEl.querySelectorAll('img'));
-            imgs.forEach(img => {
+            Array.from(containerEl.querySelectorAll('img')).forEach(img => {
                 if (img.closest('.resizable-img-box')) return;
                 const src = img.getAttribute('src');
                 if (!src) return;
@@ -1735,15 +1758,10 @@
                 else if (act === 'larger') {
                     const maxW = editorArea.clientWidth || 680;
                     box.style.width = `${Math.min(maxW, Math.round(curWidth * 1.14))}px`;
-                } else if (act === 'left') {
-                    box.style.display = 'block'; box.style.marginLeft = '0'; box.style.marginRight = 'auto';
-                } else if (act === 'center') {
-                    box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto';
-                } else if (act === 'right') {
-                    box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = '0';
-                } else if (act === 'delete') {
-                    box.remove();
-                }
+                } else if (act === 'left') { box.style.display = 'block'; box.style.marginLeft = '0'; box.style.marginRight = 'auto'; }
+                else if (act === 'center') { box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+                else if (act === 'right') { box.style.display = 'block'; box.style.marginLeft = 'auto'; box.style.marginRight = '0'; }
+                else if (act === 'delete') box.remove();
                 return;
             }
 
@@ -1796,13 +1814,13 @@
                             <span id="file-badge-${sec.key}" class="hidden text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800"></span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" onclick="triggerUploadDocFromPC('${sec.key}')" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer transition">
+                            <button type="button" onclick="triggerUploadDocFromPC('${sec.key}')" class="admin-only px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer transition">
                                 <i data-lucide="folder-up" class="w-4 h-4"></i> Word (.docx) жүктеу
                             </button>
-                            <button type="button" onclick="toggleSectionEdit('${sec.key}')" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
+                            <button type="button" onclick="toggleSectionEdit('${sec.key}')" class="admin-only px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
                                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Өзгерту / Жазу
                             </button>
-                            <button type="button" onclick="clearCleanSection('${sec.key}')" title="Парақты тазарту" class="px-3.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition">
+                            <button type="button" onclick="clearCleanSection('${sec.key}')" title="Парақты тазарту" class="admin-only px-3.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Тазарту
                             </button>
                             <button type="button" onclick="exportSingleSectionToWord('${sec.key}', '${sec.label}')" class="px-3.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
@@ -1816,14 +1834,14 @@
 
                     <div id="view-wrapper-${sec.key}" class="word-pages-workspace">
                         <div id="empty-hint-${sec.key}" class="a4-word-sheet no-print flex flex-col items-center justify-center text-center py-24 px-6">
-                            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
-                                <i data-lucide="file-up" class="w-7 h-7"></i>
+                            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center mb-3">
+                                <i data-lucide="file-text" class="w-7 h-7"></i>
                             </div>
-                            <h4 class="text-base font-extrabold text-slate-800">«${sec.label}» парағы әзірге бос</h4>
+                            <h4 class="text-base font-extrabold text-slate-800">«${sec.label}» парағы әзірге толтырылмаған</h4>
                             <p class="text-xs sm:text-sm text-slate-500 max-w-md mt-1 mb-5">
-                                Компьютерде Word арқылы дайындаған <strong>.docx</strong> файлыңызды жүктесеңіз немесе қолмен жазсаңыз, ол ортақ базаға сақталып, кез келген компьютерден көрінеді.
+                                Бұл бөлімге құжатты тек клуб әкімшісі жүктей алады.
                             </p>
-                            <div class="flex flex-wrap items-center justify-center gap-2.5">
+                            <div class="admin-only flex flex-wrap items-center justify-center gap-2.5">
                                 <button type="button" onclick="triggerUploadDocFromPC('${sec.key}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow cursor-pointer">
                                     <i data-lucide="folder-up" class="w-4 h-4"></i> Компьютерден Word (.docx) таңдау
                                 </button>
@@ -1912,8 +1930,7 @@
         function collectEditorPagesHtml(secKey) {
             const container = document.getElementById(`editor-pages-container-${secKey}`);
             if (!container) return [];
-            const areas = Array.from(container.querySelectorAll('.rich-editor-area'));
-            return areas.map(area => {
+            return Array.from(container.querySelectorAll('.rich-editor-area')).map(area => {
                 const clone = area.cloneNode(true);
                 clone.querySelectorAll('.resizable-img-box.selected').forEach(b => b.classList.remove('selected'));
                 return sanitizeRichHtml(clone.innerHTML);
@@ -1979,7 +1996,7 @@
             const printArea = document.getElementById('printable-area');
             if (!printArea) return;
             if (!contentHtml || !contentHtml.trim()) {
-                showToast("Басып шығару үшін алдымен құжатты толтырыңыз немесе Word файлын жүктеңіз.");
+                showToast("Басып шығару үшін құжат бос болмауы керек.");
                 return;
             }
             let pageStyle = document.getElementById('dynamic-print-page-style');
@@ -2037,6 +2054,7 @@
         }
 
         function triggerUploadDocFromPC(targetSec) {
+            if (!ensureAdminAccess()) return;
             uploadTargetSection = targetSec || currentDocTab || 'scenario';
             const input = document.getElementById('pc-document-upload-input');
             input.value = '';
@@ -2044,6 +2062,7 @@
         }
 
         async function handlePcDocumentSelected(e) {
+            if (!ensureAdminAccess()) return;
             const file = e.target.files[0];
             if (!file || !currentEventId) return;
 
@@ -2062,7 +2081,6 @@
                     if (!ev.rawDocxBuffers) ev.rawDocxBuffers = {};
                     ev.rawDocxBuffers[secKey] = arrayBuffer;
 
-                    // .docx файлын бұлттық Storage-ке жүктеу (басқа компьютерлер үшін)
                     const uploaded = await uploadFileToStorage(file, `events/event_${ev.id}/${secKey}`, 'docx');
                     if (uploaded) {
                         if (!ev.docxUrls) ev.docxUrls = {};
@@ -2117,7 +2135,6 @@
                     const url = URL.createObjectURL(file);
                     window.open(url, '_blank');
                     setTimeout(() => URL.revokeObjectURL(url), 60000);
-                    showToast("PDF файл жаңа қойындыда ашылды.");
                 }
             } catch (err) {
                 console.error(err);
@@ -2128,7 +2145,6 @@
         async function renderSingleCleanSection(ev, secKey) {
             let rawDocxBuffer = ev.rawDocxBuffers && ev.rawDocxBuffers[secKey];
 
-            // Егер басқа компьютерден кірсе, бұлттағы .docx сілтемесінен жүктеп алу
             if (!rawDocxBuffer && ev.docxUrls && ev.docxUrls[secKey]) {
                 try {
                     const resp = await fetch(ev.docxUrls[secKey]);
@@ -2138,7 +2154,7 @@
                         ev.rawDocxBuffers[secKey] = rawDocxBuffer;
                     }
                 } catch (fetchErr) {
-                    console.warn("Docx бұлттан жүктелмеді, HTML нұсқасы көрсетіледі:", fetchErr);
+                    console.warn("Docx бұлттан жүктелмеді:", fetchErr);
                 }
             }
 
@@ -2171,7 +2187,6 @@
                             useBase64URL: true
                         });
                     } catch (renderErr) {
-                        console.error('docx-preview fallback:', renderErr);
                         exactContainer.classList.add('hidden');
                         renderPagesStackHtml(pagesStack, pagesArr);
                     }
@@ -2218,8 +2233,11 @@
         }
 
         async function clearCleanSection(secKey) {
+            if (!ensureAdminAccess()) return;
             const ev = eventsData.find(item => item.id === currentEventId);
             if (!ev) return;
+            if (!confirm("Бұл бөлімдегі құжатты өшіруге сенімдісіз бе?")) return;
+
             if (ev.docxStoragePaths && ev.docxStoragePaths[secKey]) {
                 await deleteFileFromStorage(ev.docxStoragePaths[secKey]);
                 delete ev.docxStoragePaths[secKey];
@@ -2297,6 +2315,7 @@
         }
 
         function toggleSectionEdit(sec) {
+            if (!ensureAdminAccess()) return;
             const ev = eventsData.find(item => item.id === currentEventId);
             if (!ev) return;
 
@@ -2320,6 +2339,7 @@
         }
 
         async function saveSectionEdit(sec) {
+            if (!ensureAdminAccess()) return;
             const ev = eventsData.find(item => item.id === currentEventId);
             if (!ev) return;
 
@@ -2506,7 +2526,7 @@
 
             const bodyHtml = getCleanPrintableOrWordHtml(sec);
             if (!bodyHtml || !bodyHtml.trim()) {
-                showToast("Word-қа жүктеу үшін алдымен құжатты толтырыңыз.");
+                showToast("Word-қа жүктеу үшін құжат бос болмауы керек.");
                 return;
             }
             downloadWordHtml(bodyHtml, `${label}_${ev.date}.doc`, false);
@@ -2519,7 +2539,7 @@
                 .map(s => getCleanPrintableOrWordHtml(s.key))
                 .filter(htmlPart => htmlPart && htmlPart.trim().length > 0);
             if (parts.length === 0) {
-                showToast("Экспорттау үшін алдымен кемінде бір бөлімге құжат жүктеңіз.");
+                showToast("Экспорттау үшін кемінде бір бөлімде құжат болуы керек.");
                 return;
             }
             downloadWordHtml(parts.join('<br clear="all" style="page-break-before:always">'), `Құжаттар_${ev.date}.doc`, false);
@@ -2641,7 +2661,7 @@ img { max-width: 100%; height: auto; }
                                 </div>
                             </div>
                             <button type="button" onclick="openAddEventModal(${qId}, '${monthName}')"
-                                class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-brand-gold hover:text-brand-tealDark text-white text-xs font-extrabold border border-white/25 transition flex items-center gap-1.5 cursor-pointer">
+                                class="admin-only px-3.5 py-2 rounded-xl bg-white/15 hover:bg-brand-gold hover:text-brand-tealDark text-white text-xs font-extrabold border border-white/25 transition flex items-center gap-1.5 cursor-pointer">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                                 <span>${monthName} айына шара қосу</span>
                             </button>
@@ -2675,6 +2695,7 @@ img { max-width: 100%; height: auto; }
         }
 
         function openAddEventModal(qId = 1, monthName = null) {
+            if (!ensureAdminAccess()) return;
             document.getElementById('inp-quarter').value = qId;
             updateMonthOptions();
             if (monthName) document.getElementById('inp-month').value = monthName;
@@ -2689,6 +2710,7 @@ img { max-width: 100%; height: auto; }
         }
         async function handleCreateEvent(e) {
             e.preventDefault();
+            if (!ensureAdminAccess()) return;
             const qId = parseInt(document.getElementById('inp-quarter').value, 10);
             const month = document.getElementById('inp-month').value;
             const title = document.getElementById('inp-title').value.trim();
@@ -2710,7 +2732,7 @@ img { max-width: 100%; height: auto; }
             showToast("Жаңа іс-шара ортақ базаға қосылды!");
         }
 
-        // ==================== ҮЙІРМЕЛЕР ЖӘНЕ PDF ҚҰЖАТТАР (SUPABASE STORAGE) ====================
+        // ==================== ҮЙІРМЕЛЕР ЖӘНЕ PDF ҚҰЖАТТАР ====================
         let currentClubId = null, currentClubSection = 'plan', currentViewingClubPdfUrl = null, currentViewingClubPdfDoc = null, currentViewingClubDocId = null, editingClubDoc = null;
 
         function exportClubRosterToWord(elementId, filename) {
@@ -2835,6 +2857,7 @@ img { max-width: 100%; height: auto; }
 
         async function handleClubPdfUpload(e) {
             e.preventDefault();
+            if (!ensureAdminAccess()) return;
             if (!currentClubId || isCleanPresetClubSection()) return;
             const titleInp = document.getElementById('club-doc-title');
             const fileInp = document.getElementById('club-doc-file');
@@ -2865,7 +2888,7 @@ img { max-width: 100%; height: auto; }
                 fileInp.value = '';
                 await syncAllFromSupabase(false);
                 renderClubModalDocs();
-                showToast("PDF құжат барлық компьютерлерге ортақ болып сақталды!");
+                showToast("PDF құжат ортақ базаға сақталды!");
             }
         }
 
@@ -2893,8 +2916,8 @@ img { max-width: 100%; height: auto; }
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button type="button" onclick="previewClubDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="openEditClubDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        <button type="button" onclick="deleteClubDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="openEditClubDocModal(${d.id})" title="Өзгерту" class="admin-only p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteClubDocById(${d.id})" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -2902,6 +2925,7 @@ img { max-width: 100%; height: auto; }
         }
 
         function openEditClubDocModal(docId) {
+            if (!ensureAdminAccess()) return;
             const doc = cloudPdfCache.club.find(d => d.id === docId);
             if (!doc) return;
             editingClubDoc = doc;
@@ -2919,7 +2943,7 @@ img { max-width: 100%; height: auto; }
 
         async function handleSaveEditedClubDoc(e) {
             e.preventDefault();
-            if (!editingClubDoc) return;
+            if (!ensureAdminAccess() || !editingClubDoc) return;
             const newTitle = document.getElementById('edit-club-doc-title').value.trim();
             const newFile = document.getElementById('edit-club-doc-file').files[0];
             if (!newTitle) return;
@@ -2959,6 +2983,7 @@ img { max-width: 100%; height: auto; }
         }
 
         async function deleteClubDocById(docId) {
+            if (!ensureAdminAccess()) return;
             if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.club.find(d => d.id === docId);
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
@@ -3023,6 +3048,7 @@ img { max-width: 100%; height: auto; }
         }
 
         function toggleMtbMainEdit() {
+            if (!ensureAdminAccess()) return;
             document.getElementById('mtb-main-view-wrap').classList.add('hidden');
             document.getElementById('mtb-main-edit-wrap').classList.remove('hidden');
             const editorEl = document.getElementById('mtb-main-editor');
@@ -3038,6 +3064,7 @@ img { max-width: 100%; height: auto; }
         }
 
         async function saveMtbMainContent() {
+            if (!ensureAdminAccess()) return;
             const editorEl = document.getElementById('mtb-main-editor');
             const clone = editorEl.cloneNode(true);
             clone.querySelectorAll('.resizable-img-box.selected').forEach(b => b.classList.remove('selected'));
@@ -3049,12 +3076,14 @@ img { max-width: 100%; height: auto; }
         }
 
         function triggerMtbWordUpload() {
+            if (!ensureAdminAccess()) return;
             const input = document.getElementById('mtb-word-upload-input');
             input.value = '';
             input.click();
         }
 
         async function handleMtbWordSelected(e) {
+            if (!ensureAdminAccess()) return;
             const file = e.target.files[0];
             if (!file) return;
             const ext = file.name.split('.').pop().toLowerCase();
@@ -3105,7 +3134,7 @@ img { max-width: 100%; height: auto; }
             triggerPrintWithArea(sheetHtml, true);
         }
 
-        // ==================== АҚЫЛЫ ҚЫЗМЕТ (SUPABASE STORAGE) ====================
+        // ==================== АҚЫЛЫ ҚЫЗМЕТ ====================
         let currentViewingPaidPdfUrl = null, currentViewingPaidPdfDoc = null, currentViewingPaidDocId = null;
 
         function resetPaidPdfViewer() {
@@ -3120,6 +3149,7 @@ img { max-width: 100%; height: auto; }
 
         async function handlePaidServicePdfUpload(e) {
             e.preventDefault();
+            if (!ensureAdminAccess()) return;
             const titleInp = document.getElementById('paid-doc-title');
             const fileInp = document.getElementById('paid-doc-file');
             const docTitle = titleInp.value.trim();
@@ -3173,7 +3203,7 @@ img { max-width: 100%; height: auto; }
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="deletePaidDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deletePaidDocById(${d.id})" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -3196,6 +3226,7 @@ img { max-width: 100%; height: auto; }
         }
 
         async function deletePaidDocById(docId) {
+            if (!ensureAdminAccess()) return;
             if (!confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.paid.find(d => d.id === docId);
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
@@ -3220,7 +3251,7 @@ img { max-width: 100%; height: auto; }
             document.getElementById('paid-pdf-fullscreen-modal').classList.add('hidden');
         }
 
-        // ==================== ҚЫЗМЕТКЕРЛЕР (SUPABASE STORAGE) ====================
+        // ==================== ҚЫЗМЕТКЕРЛЕР ====================
         let currentStaffId = null, currentViewingPdfUrl = null, currentViewingPdfDoc = null, currentViewingDocId = null, editingStaffDoc = null;
 
         function updateCloudStaffCounts() {
@@ -3262,7 +3293,7 @@ img { max-width: 100%; height: auto; }
 
         async function handleStaffPdfUpload(e) {
             e.preventDefault();
-            if (!currentStaffId) return;
+            if (!ensureAdminAccess() || !currentStaffId) return;
             const titleInp = document.getElementById('staff-doc-title');
             const fileInp = document.getElementById('staff-doc-file');
             const docTitle = titleInp.value.trim();
@@ -3317,8 +3348,8 @@ img { max-width: 100%; height: auto; }
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button type="button" onclick="previewStaffDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="openEditStaffDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        <button type="button" onclick="deleteStaffDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="openEditStaffDocModal(${d.id})" title="Өзгерту" class="admin-only p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteStaffDocById(${d.id})" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -3326,6 +3357,7 @@ img { max-width: 100%; height: auto; }
         }
 
         function openEditStaffDocModal(docId) {
+            if (!ensureAdminAccess()) return;
             const doc = cloudPdfCache.staff.find(d => d.id === docId);
             if (!doc) return;
             editingStaffDoc = doc;
@@ -3343,7 +3375,7 @@ img { max-width: 100%; height: auto; }
 
         async function handleSaveEditedStaffDoc(e) {
             e.preventDefault();
-            if (!editingStaffDoc) return;
+            if (!ensureAdminAccess() || !editingStaffDoc) return;
             const newTitle = document.getElementById('edit-staff-doc-title').value.trim();
             const newFile = document.getElementById('edit-staff-doc-file').files[0];
             if (!newTitle) return;
@@ -3382,6 +3414,7 @@ img { max-width: 100%; height: auto; }
         }
 
         async function deleteStaffDocById(docId) {
+            if (!ensureAdminAccess()) return;
             if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.staff.find(d => d.id === docId);
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
@@ -3453,6 +3486,7 @@ img { max-width: 100%; height: auto; }
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
         async function resetAllData() {
+            if (!ensureAdminAccess()) return;
             if (!confirm("Жоспар тізімін бастапқы 34 шараға қалпына келтіруді растайсыз ба?")) return;
             await sb.from('documents').delete().eq('category', 'annual_event');
             eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
@@ -3472,7 +3506,8 @@ img { max-width: 100%; height: auto; }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (!document.getElementById('paid-pdf-fullscreen-modal').classList.contains('hidden')) closePaidServiceFullscreen();
+                if (!document.getElementById('admin-login-modal').classList.contains('hidden')) closeAdminLoginModal();
+                else if (!document.getElementById('paid-pdf-fullscreen-modal').classList.contains('hidden')) closePaidServiceFullscreen();
                 else if (!document.getElementById('insert-table-modal').classList.contains('hidden')) closeInsertTableModal();
                 else if (!document.getElementById('add-event-modal').classList.contains('hidden')) closeAddEventModal();
                 else if (!document.getElementById('edit-club-doc-modal').classList.contains('hidden')) closeEditClubDocModal();
@@ -3485,7 +3520,7 @@ img { max-width: 100%; height: auto; }
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            checkPlatformLockState();
+            applyRoleUIState();
             buildCleanWordSectionsDOM();
             initAllRichToolbars();
             updateMonthOptions();
