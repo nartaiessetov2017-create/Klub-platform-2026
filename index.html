@@ -3800,7 +3800,56 @@ img { max-width: 100%; height: auto; }
   };
 
   // 2. Қызметкерді 'employees' кестесіне сақтау
-  window.saveEmployeeToSupabase = async function (empData = {}) {
+ window.saveEmployeeToSupabase = async function (empData = {}) {
+    try {
+      const fullName = String(
+        empData.full_name || empData.name || empData.fio || ""
+      ).trim();
+      const position = String(
+        empData.position || empData.role || empData.title || ""
+      ).trim();
+      const phone = String(empData.phone || empData.tel || "").trim();
+      const baseNotes =
+        typeof empData.notes === "string"
+          ? empData.notes.trim()
+          : String(empData.info || "").trim();
+
+      const extraEntries = Object.entries(empData || {}).filter(
+        ([k, v]) =>
+          !["full_name", "name", "fio", "position", "role", "title", "phone", "tel", "notes", "info"].includes(k) &&
+          String(v ?? "").trim() !== ""
+      );
+
+      const extraText = extraEntries.length
+        ? extraEntries.map(([k, v]) => `${k}: ${v}`).join(" | ")
+        : "";
+
+      const combinedNotes = [baseNotes, extraText].filter(Boolean).join(" — ");
+
+      const payload = {
+        full_name: fullName || "Аты-жөні көрсетілмеген",
+        position: position,
+        phone: phone,
+        notes: combinedNotes
+      };
+
+      const { data, error } = await sb
+        .from("employees")
+        .insert([payload])
+        .select();
+
+      if (error) {
+        console.error("Supabase 'employees' кестесіне сақтау қатесі:", error);
+        return null;
+      }
+
+      console.log("Supabase 'employees' кестесіне сақталды:", data);
+      return data && data[0] ? data[0] : true;
+    } catch (err) {
+      console.error("saveEmployeeToSupabase күтпеген қатесі:", err);
+      return null;
+    }
+  }; window.saveEmployeeToSupabase = async function (empData = {}) {
     const payload = {
       full_name: String(
         empData.full_name || empData.name || empData.fio || ""
