@@ -3889,7 +3889,51 @@ img { max-width: 100%; height: auto; }
       documents: docsRes.data || [],
       employees: empRes.data || []
     };
+(function bindSupabaseLoading() {
+  if (typeof window.loadAllFromSupabase !== 'function') return;
 
+  const originalLoadAll = window.loadAllFromSupabase;
+
+  function applySupaDataToUi(data) {
+    if (!data) return;
+    window.__SUPA_CACHE__ = data;
+
+    if (Array.isArray(data.employees) && typeof window.renderStaff === 'function') {
+      try { window.renderStaff(data.employees); } catch (_) {
+        try { window.renderStaff(); } catch (__) {}
+      }
+    }
+
+    if (typeof window.renderClubs === 'function') {
+      try { window.renderClubs(); } catch (_) {}
+    }
+
+    if (typeof window.renderQuartersSelector === 'function') {
+      try { window.renderQuartersSelector(); } catch (_) {}
+    }
+
+    if (typeof window.renderQuarterMonths === 'function') {
+      try { window.renderQuarterMonths(); } catch (_) {}
+    }
+
+    if (typeof window.renderPaidServiceDocs === 'function') {
+      try { window.renderPaidServiceDocs(); } catch (_) {}
+    }
+  }
+
+  window.loadAllFromSupabase = async function (...args) {
+    const result = await originalLoadAll.apply(this, args);
+    const data = result || window.__SUPA_CACHE__;
+    applySupaDataToUi(data);
+    return result;
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      window.loadAllFromSupabase().catch(() => {});
+    }, 300);
+  });
+})();
     return window.__SUPA_CACHE__;
   };
 
