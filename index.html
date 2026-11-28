@@ -379,6 +379,64 @@
             font-size: 13.5px;
         }
 
+        /* FACEBOOK ПАРАҚШАСЫ БӨЛІМІ */
+        .facebook-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 900px) {
+            .facebook-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .club-photo {
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 430px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            background: #0F4C5C;
+        }
+
+        .club-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .club-photo:hover img {
+            transform: scale(1.03);
+        }
+
+        .club-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.72),
+                rgba(0,0,0,0.12)
+            );
+            pointer-events: none;
+        }
+
+        .club-title {
+            position: absolute;
+            bottom: 22px;
+            left: 22px;
+            right: 22px;
+            color: white;
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.25;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+        }
+
         #printable-area { display: none; }
 
         @media print {
@@ -762,7 +820,9 @@
 
         <!-- 6. КЛУБТЫҢ FACEBOOK ПАРАҚШАСЫ -->
         <section id="section-facebook-page" class="hidden space-y-6">
-            <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-brand-gold/30 space-y-5">
+            <input type="file" id="fb-club-photo-input" accept="image/*" class="hidden" onchange="handleFbClubPhotoSelected(event)">
+
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-md border border-brand-gold/30 space-y-6">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div class="flex items-center gap-3.5">
                         <div class="w-12 h-12 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center shadow-md shrink-0">
@@ -771,17 +831,16 @@
                         <div>
                             <h2 class="text-xl sm:text-2xl font-extrabold text-brand-teal">«Жаңақұрылыс ауылдық клубы» Facebook парақшасы</h2>
                             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                                Клубтың ресми әлеуметтік желідегі жаңалықтары, фото-бейне есептері және жарияланымдары.
+                                Мәдениет ошағының ресми әлеуметтік желідегі жаңалықтары мен фото-бейне есептері
                             </p>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <a id="fb-direct-open-link" href="https://www.facebook.com/search/top?q=%D0%96%D0%B0%D2%A3%D0%B0%D2%9B%D2%B1%D1%80%D1%8B%D0%BB%D1%8B%D1%81%20%D0%B0%D1%83%D1%8B%D0%BB%D0%B4%D1%8B%D2%9B%20%D0%BA%D0%BB%D1%83%D0%B1%D1%8B" target="_blank" rel="noopener noreferrer"
-                           class="px-4 py-2.5 rounded-xl bg-[#1877F2] hover:bg-[#166FE5] text-white text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow cursor-pointer transition">
-                            <i data-lucide="external-link" class="w-4 h-4"></i>
-                            <span>Facebook-те толық ашу</span>
-                        </a>
+                        <button type="button" onclick="triggerFbPhotoUpload()" class="admin-only px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
+                            <i data-lucide="image-plus" class="w-4 h-4"></i>
+                            <span>Клуб суретін ауыстыру</span>
+                        </button>
                         <button type="button" onclick="toggleFbUrlSettings()" class="admin-only px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow cursor-pointer transition">
                             <i data-lucide="settings" class="w-4 h-4"></i>
                             <span>Сілтемені баптау</span>
@@ -805,69 +864,84 @@
                             Жабу
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-500">
-                        Сақталған сілтеме ортақ базаға жазылады және барлық компьютерлерде бірден ашылады.
-                    </p>
                 </form>
 
-                <!-- FACEBOOK ПАРАҚШАСЫНЫҢ ВИЗУАЛДЫ КАРТОЧКАСЫ ЖӘНЕ ТІКЕЛЕЙ ЛЕНТАСЫ -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    <!-- Сол жақ: Клуб профилінің ақпараттық карточкасы -->
-                    <div class="lg:col-span-5 bg-gradient-to-br from-slate-50 to-brand-cream/70 rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
-                        <div class="h-28 kazakh-pattern-bg relative flex items-end p-4">
-                            <span class="px-2.5 py-1 rounded-full bg-brand-gold text-brand-tealDark text-[10px] font-extrabold uppercase tracking-wider shadow">Ресми парақша</span>
+                <!-- 2 БАҒАНДЫ (.facebook-section) НЕГІЗГІ БЛОК -->
+                <div class="facebook-section">
+                    <!-- СОЛ ЖАҚ: КЛУБ СУРЕТІ + ГРАДИЕНТ + АТАУЫ -->
+                    <div class="club-photo">
+                        <img id="fb-club-photo-img" src="" alt="«Жаңақұрылыс ауылдық клубы» КМҚК">
+                        <div class="club-overlay"></div>
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 rounded-full bg-brand-gold text-brand-tealDark text-xs font-extrabold uppercase tracking-wider shadow-md">
+                                Мәдениет ошағы • 2026
+                            </span>
                         </div>
-                        <div class="p-5 -mt-8 relative space-y-4">
-                            <div class="flex items-end gap-3.5">
-                                <div class="w-16 h-16 rounded-2xl bg-[#1877F2] border-4 border-white text-white flex items-center justify-center shadow-lg shrink-0">
-                                    <svg class="w-9 h-9 fill-current" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
-                                </div>
-                                <div class="pb-1 min-w-0">
-                                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">«Жаңақұрылыс ауылдық клубы» КМҚК</h3>
-                                    <p class="text-xs text-slate-500 font-semibold">Мәдениет үйі • Арал ауданы, Жаңақұрылыс ауылы</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-xl p-3.5 border border-slate-200 text-xs text-slate-700 space-y-2">
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="map-pin" class="w-4 h-4 text-brand-teal shrink-0"></i>
-                                    <span>Қызылорда облысы, Арал ауданы, Жаңақұрылыс елді мекені</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="phone" class="w-4 h-4 text-brand-teal shrink-0"></i>
-                                    <span>8 775 638 10 20</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="link-2" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
-                                    <span id="fb-display-url-text" class="text-[#1877F2] font-bold truncate">https://www.facebook.com</span>
-                                </div>
-                            </div>
-
-                            <a id="fb-card-open-btn" href="https://www.facebook.com/search/top?q=%D0%96%D0%B0%D2%A3%D0%B0%D2%9B%D2%B1%D1%80%D1%8B%D0%BB%D1%8B%D1%81%20%D0%B0%D1%83%D1%8B%D0%BB%D0%B4%D1%8B%D2%9B%20%D0%BA%D0%BB%D1%83%D0%B1%D1%8B" target="_blank" rel="noopener noreferrer"
-                               class="w-full py-3 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166FE5] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition">
-                                <span>Парақшаға өту (Жаңа терезеде ашу)</span>
-                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                            </a>
+                        <div class="club-title">
+                            «Жаңақұрылыс ауылдық клубы» КМҚК
+                            <span class="block text-xs sm:text-sm font-medium text-brand-goldLight mt-1">
+                                Қызылорда облысы • Арал ауданы • Жаңақұрылыс елді мекені
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Оң жақ: Facebook Page Plugin тікелей лента терезесі -->
-                    <div class="lg:col-span-7 bg-slate-100 rounded-2xl border-2 border-slate-200 p-4 flex flex-col items-center justify-center min-h-[540px]">
-                        <div id="fb-embed-wrapper" class="w-full max-w-[520px] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                            <iframe id="fb-page-plugin-iframe"
-                                    src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook&tabs=timeline&width=500&height=520&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
-                                    width="100%"
-                                    height="520"
-                                    style="border:none;overflow:hidden"
-                                    scrolling="no"
-                                    frameborder="0"
-                                    allowfullscreen="true"
-                                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-                            </iframe>
+                    <!-- ОҢ ЖАҚ: FACEBOOK РЕСМИ ПАРАҚША КАРТОЧКАСЫ -->
+                    <div class="bg-gradient-to-br from-brand-cream/70 via-white to-sky-50/70 rounded-[20px] border-2 border-brand-gold/40 p-6 sm:p-7 shadow-lg flex flex-col justify-between space-y-5">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1877F2]/10 text-[#1877F2] text-xs font-extrabold">
+                                    <span class="w-2 h-2 rounded-full bg-[#1877F2] animate-pulse"></span>
+                                    Ресми Facebook парақша
+                                </span>
+                                <span class="text-xs font-bold text-slate-400">Ашық парақша</span>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center shadow-lg shrink-0">
+                                    <svg class="w-9 h-9 fill-current" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
+                                        Жаңақұрылыс Ауылдық Клубы
+                                    </h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+                                        Мәдени іс-шаралар, концерттер, үйірме жұмыстары және ауыл жаңалықтары
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/90 rounded-2xl p-4 border border-slate-200/90 space-y-2.5 text-xs sm:text-sm text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-brand-teal shrink-0"></i>
+                                    <span><strong>Мекенжайы:</strong> Арал ауданы, Жаңақұрылыс елді мекені</span>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="user-check" class="w-4 h-4 text-brand-teal shrink-0"></i>
+                                    <span><strong>Меңгерушісі:</strong> Есетов Нартай Серікұлы</span>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="phone" class="w-4 h-4 text-brand-teal shrink-0"></i>
+                                    <span><strong>Байланыс:</strong> +7 775 638 10 20</span>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="link-2" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
+                                    <span id="fb-display-url-text" class="text-[#1877F2] font-bold truncate"></span>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-[11px] text-slate-500 mt-3 text-center max-w-md">
-                            Егер лента көрінбесе, әкімші режимінде <strong>«Сілтемені баптау»</strong> арқылы клубтың нақты Facebook парақшасының сілтемесін енгізіңіз немесе <strong>«Facebook-те толық ашу»</strong> батырмасын басыңыз.
-                        </p>
+
+                        <div class="space-y-2.5 pt-2">
+                            <a id="fb-direct-open-link" href="#" target="_blank" rel="noopener noreferrer"
+                               class="w-full py-3.5 px-5 rounded-2xl bg-[#1877F2] hover:bg-[#166FE5] text-white font-extrabold text-sm sm:text-base shadow-lg hover:shadow-xl flex items-center justify-center gap-2.5 transition">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+                                <span>Facebook парақшасын ашу</span>
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </a>
+                            <button type="button" onclick="copyFacebookLink()" class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-brand-cream text-brand-teal border border-brand-gold/50 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition">
+                                <i data-lucide="copy" class="w-3.5 h-3.5 text-brand-gold"></i>
+                                <span>Парақша сілтемесін көшіріп алу</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1643,6 +1717,7 @@
         // Facebook парақша баптаулары
         const DEFAULT_FB_URL = "https://www.facebook.com/search/top?q=%D0%96%D0%B0%D2%A3%D0%B0%D2%9B%D2%B1%D1%80%D1%8B%D0%BB%D1%8B%D1%81%20%D0%B0%D1%83%D1%8B%D0%BB%D0%B4%D1%8B%D2%9B%20%D0%BA%D0%BB%D1%83%D0%B1%D1%8B";
         let currentFbUrl = DEFAULT_FB_URL;
+        let currentFbPhotoUrl = CLUB_BUILDING_SVG;
         let currentFbRowId = null;
 
         let cloudPdfCache = { club: [], staff: [], paid: [] };
@@ -1652,20 +1727,56 @@
         // ==================== FACEBOOK ПАРАҚША ФУНКЦИЯЛАРЫ ====================
         function applyFacebookPageUI() {
             const directLink = document.getElementById('fb-direct-open-link');
-            const cardBtn = document.getElementById('fb-card-open-btn');
             const urlText = document.getElementById('fb-display-url-text');
-            const pluginIframe = document.getElementById('fb-page-plugin-iframe');
             const urlInput = document.getElementById('fb-url-input');
+            const photoImg = document.getElementById('fb-club-photo-img');
 
             if (directLink) directLink.href = currentFbUrl;
-            if (cardBtn) cardBtn.href = currentFbUrl;
             if (urlText) urlText.textContent = currentFbUrl;
             if (urlInput) urlInput.value = currentFbUrl;
+            if (photoImg) photoImg.src = currentFbPhotoUrl || CLUB_BUILDING_SVG;
+        }
 
-            if (pluginIframe) {
-                const encodedUrl = encodeURIComponent(currentFbUrl);
-                pluginIframe.src = `https://www.facebook.com/plugins/page.php?href=${encodedUrl}&tabs=timeline&width=500&height=520&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`;
+        function copyFacebookLink() {
+            navigator.clipboard?.writeText(currentFbUrl);
+            showToast("Facebook парақшасының сілтемесі көшірілді!");
+        }
+
+        function triggerFbPhotoUpload() {
+            if (!ensureAdminAccess()) return;
+            const inp = document.getElementById('fb-club-photo-input');
+            if (inp) {
+                inp.value = '';
+                inp.click();
             }
+        }
+
+        async function handleFbClubPhotoSelected(e) {
+            if (!ensureAdminAccess()) return;
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showToast("Клуб суреті ортақ базаға жүктелуде...");
+            const uploaded = await uploadFileToStorage(file, "facebook_banner");
+            if (!uploaded) return;
+
+            currentFbPhotoUrl = uploaded.publicUrl;
+            applyFacebookPageUI();
+
+            const payload = {
+                title: 'Клубтың Facebook парақшасы',
+                category: 'facebook_link',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: { url: currentFbUrl, photoUrl: currentFbPhotoUrl }
+            };
+
+            if (currentFbRowId) {
+                await sb.from('documents').update(payload).eq('id', currentFbRowId);
+            } else {
+                const { data } = await sb.from('documents').insert([payload]).select();
+                if (data && data[0]) currentFbRowId = data[0].id;
+            }
+            showToast("Клуб суреті сәтті жаңартылды!");
         }
 
         function toggleFbUrlSettings() {
@@ -1688,7 +1799,7 @@
                 title: 'Клубтың Facebook парақшасы',
                 category: 'facebook_link',
                 doc_date: new Date().toISOString().slice(0, 10),
-                content: { url: newUrl }
+                content: { url: newUrl, photoUrl: currentFbPhotoUrl }
             };
 
             if (currentFbRowId) {
@@ -1817,8 +1928,9 @@
                 if (fbRows.length > 0) {
                     const latestFb = fbRows[fbRows.length - 1];
                     currentFbRowId = latestFb.id;
-                    if (latestFb.content && latestFb.content.url) {
-                        currentFbUrl = latestFb.content.url;
+                    if (latestFb.content) {
+                        if (latestFb.content.url) currentFbUrl = latestFb.content.url;
+                        if (latestFb.content.photoUrl) currentFbPhotoUrl = latestFb.content.photoUrl;
                     }
                 }
                 applyFacebookPageUI();
