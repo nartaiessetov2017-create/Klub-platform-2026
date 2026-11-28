@@ -2419,7 +2419,7 @@
         function openPaidServiceFullscreen() { if (currentViewingPaidPdfUrl) { document.getElementById('paid-pdf-fullscreen-modal').classList.remove('hidden'); lucide.createIcons(); } }
         function closePaidServiceFullscreen() { document.getElementById('paid-pdf-fullscreen-modal').classList.add('hidden'); }
 
-        // ==================== ҚЫЗМЕТКЕРЛЕР (ТОЛЫҚ ТҮЗЕТІЛГЕН) ====================
+        // ==================== ҚЫЗМЕТКЕРЛЕР (UUID ҚОЛДАУЫМЕН ТОЛЫҚ ТҮЗЕТІЛГЕН) ====================
         let currentStaffId = null, currentViewingPdfUrl = null, currentViewingPdfDoc = null, currentViewingDocId = null, editingStaffDoc = null;
 
         function updateCloudStaffCounts() {
@@ -2430,6 +2430,225 @@
             });
             staffDocCounts = counts;
             renderStaff();
+        }
+
+        function resetStaffPdfViewer() {
+            currentViewingPdfUrl = null;
+            currentViewingPdfDoc = null;
+            currentViewingDocId = null;
+            const iframe = document.getElementById('staff-pdf-iframe');
+            if (iframe) iframe.src = '';
+            document.getElementById('staff-pdf-viewer-box')?.classList.add('hidden');
+            document.getElementById('staff-pdf-empty-state')?.classList.remove('hidden');
+        }
+
+        async function openStaffModal(staffId) {
+            if (!ensureAdminAccess()) return;
+            const staff = STAFF_DATA.find(s => Number(s.id) === Number(staffId));
+            if (!staff) return;
+            currentStaffId = Number(staffId);
+            resetStaffPdfViewer();
+            document.getElementById('staff-modal-avatar').textContent = staff.name.charAt(0);
+            document.getElementById('staff-modal-name').textContent = staff.name;
+            document.getElementById('staff-modal-role').textContent = staff.role;
+            document.getElementById('staff-modal-resp').textContent = staff.resp;
+            renderStaffModalDocs();
+            document.getElementById('staff-dossier-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeStaffModal() {
+            document.getElementById('staff-dossier-modal').classList.add('hidden');
+            currentStaffId = null;
+            resetStaffPdfViewer();
+        }
+
+        async function handleStaffPdfUpload(e) {
+            e.preventDefault();
+            if (!ensureAdminAccess()) return;
+            if (!currentStaffId) {
+                showToast("Қызметкер таңдалмаған!");
+                return;
+            }
+            const titleInp = document.getElementById('staff-doc-title');
+            const fileInp = document.getElementById('staff-doc-file');
+            const docTitle = titleInp.value.trim();
+            const file = fileInp.files[0];
+            if (!docTitle || !file) {
+                showToast("Құжат атауы мен PDF файлды таңдаңыз!");
+                return;
+            }
+
+            showToast("Қызметкер құжаты жүктелуде...");
+            const uploaded = await uploadFileToStorage(file, `staff/staff_${currentStaffId}`, 'pdf');
+            if (!uploaded) return;
+
+            const payload = {
+                title: docTitle,
+                category: 'staff_pdf',
+                doc_date: new Date().toISOString().slice(0, 10),
+                content: {
+                    staffId: Number(currentStaffId),
+                    docTitle,
+                    fileName: file.name,
+                    fileUrl: uploaded.publicUrl,
+                    storagePath: uploaded.storagePath
+                }
+            };
+
+            const { data, error } = await sb.from('documents').insert([payload]).select();
+            if (error) {
+                console.error("Supabase insert қатесі:", error);
+                showToast("Базаға жазу қатесі: " + error.message);
+                return;
+            }
+
+            titleInp.value = '';
+            fileInp.value = '';
+            await syncAllFromSupabase(false);
+            renderStaffModalDocs();
+            if (data && data[0]) previewStaffDocById(String(data[0].id));
+            showToast("Қызметкер құжаты сәтті сақталды!");
+        }
+
+        function renderStaffModalDocs() {
+            if (!isAdminMode || !currentStaffId) return;
+            const docs = cloudPdfCache.staff.filter(d => Number(d.staffId) === Number(currentStaffId));
+            const badge = document.getElementById('staff-docs-count-badge');
+            if (badge) badge.textContent = `${docs.length} құжат`;
+
+            const listEl = document.getElementById('staff-docs-list');
+            if (!listEl) return;
+
+            if (docs.length === 0) {
+                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = docs.map(d => {
+                const safeId = escapeHtml(String(d.id));
+                const isSelected = String(currentViewingDocId) === String(d.id);
+                return `
+                <div class="p-3 rounded-xl border ${isSelected ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewStaffDocById('${safeId}')" class="min-w-0 flex-1 cursor-pointer">
+                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
+                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="previewStaffDocById('${safeId}')" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="openEditStaffDocModal('${safeId}')" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteStaffDocById('${safeId}')" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `}).join('');
+            lucide.createIcons();
+        }
+
+        function openEditStaffDocModal(docId) {
+            if (!ensureAdminAccess()) return;
+            const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
+            if (!doc) {
+                showToast("Құжат табылмады!");
+                return;
+            }
+            editingStaffDoc = doc;
+            document.getElementById('edit-staff-doc-title').value = doc.docTitle;
+            document.getElementById('edit-staff-doc-file').value = '';
+            document.getElementById('edit-staff-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
+            document.getElementById('edit-staff-doc-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeEditStaffDocModal() {
+            editingStaffDoc = null;
+            document.getElementById('edit-staff-doc-modal').classList.add('hidden');
+        }
+
+        async function handleSaveEditedStaffDoc(e) {
+            e.preventDefault();
+            if (!ensureAdminAccess() || !editingStaffDoc) return;
+            const newTitle = document.getElementById('edit-staff-doc-title').value.trim();
+            const newFile = document.getElementById('edit-staff-doc-file').files[0];
+            if (!newTitle) return;
+
+            let fileUrl = editingStaffDoc.fileUrl;
+            let storagePath = editingStaffDoc.storagePath;
+            let fileName = editingStaffDoc.fileName;
+
+            if (newFile) {
+                showToast("Жаңа PDF жүктелуде...");
+                const uploaded = await uploadFileToStorage(newFile, `staff/staff_${editingStaffDoc.staffId}`, 'pdf');
+                if (!uploaded) return;
+                if (storagePath) await deleteFileFromStorage(storagePath);
+                fileUrl = uploaded.publicUrl;
+                storagePath = uploaded.storagePath;
+                fileName = newFile.name;
+            }
+
+            const { error } = await sb.from('documents').update({
+                title: newTitle,
+                content: {
+                    staffId: Number(editingStaffDoc.staffId),
+                    docTitle: newTitle,
+                    fileName,
+                    fileUrl,
+                    storagePath
+                }
+            }).eq('id', String(editingStaffDoc.id));
+
+            if (error) {
+                console.error("Update қатесі:", error);
+                showToast("Өзгерту қатесі: " + error.message);
+                return;
+            }
+
+            const wasViewing = String(currentViewingDocId) === String(editingStaffDoc.id);
+            const editedId = String(editingStaffDoc.id);
+            closeEditStaffDocModal();
+            await syncAllFromSupabase(false);
+            renderStaffModalDocs();
+            if (wasViewing) previewStaffDocById(editedId);
+            showToast("Құжат сәтті жаңартылды!");
+        }
+
+        async function deleteStaffDocById(docId) {
+            if (!ensureAdminAccess()) return;
+            if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
+
+            const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
+            if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
+
+            const { error } = await sb.from('documents').delete().eq('id', String(docId));
+            if (error) {
+                console.error("Delete қатесі:", error);
+                showToast("Өшіру қатесі: " + error.message);
+                return;
+            }
+
+            if (String(currentViewingDocId) === String(docId)) resetStaffPdfViewer();
+            await syncAllFromSupabase(false);
+            renderStaffModalDocs();
+            showToast("Құжат сәтті өшірілді!");
+        }
+
+        function previewStaffDocById(docId) {
+            if (!ensureAdminAccess()) return;
+            const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
+            if (!doc || !doc.fileUrl) {
+                showToast("PDF сілтемесі табылмады!");
+                return;
+            }
+            currentViewingPdfUrl = doc.fileUrl;
+            currentViewingPdfDoc = doc;
+            currentViewingDocId = String(doc.id);
+
+            document.getElementById('staff-pdf-viewer-title').textContent = doc.docTitle;
+            const iframe = document.getElementById('staff-pdf-iframe');
+            iframe.src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
+
+            document.getElementById('staff-pdf-empty-state').classList.add('hidden');
+            document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
+            renderStaffModalDocs();
         }
 
         function resetStaffPdfViewer() {
