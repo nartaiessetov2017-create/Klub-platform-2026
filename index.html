@@ -389,7 +389,7 @@
             </div>
         </section>
 
-        <!-- 6. КЛУБТЫҢ FACEBOOK ПАРАҚШАСЫ (ҚАЙТАЛАНУСЫЗ ТАЗА НҰСҚА) -->
+        <!-- 6. КЛУБТЫҢ FACEBOOK ПАРАҚШАСЫ -->
         <section id="section-facebook-page" class="hidden space-y-6">
             <input type="file" id="fb-club-photo-input" accept="image/*" class="hidden" onchange="handleFbClubPhotoSelected(event)">
             <div class="fb-showcase-wrapper space-y-6">
@@ -1224,12 +1224,6 @@
                 applyFacebookPageUI();
 
                 cloudPdfCache = { club: [], staff: [], paid: [] };
-                rows.slice().reverse().forEach(row => {
-                    const item = { id: String(row.id), ...(row.content || {}), docTitle: row.title };
-                    if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
-                    if (row.category === 'staff_pdf') cloudPdfCache.staff.push(item);
-                    if (row.category === 'paid_pdf') cloudPdfCache.paid.push(item);
-                });
                 rows.slice().reverse().forEach(row => {
                     const item = { id: String(row.id), ...(row.content || {}), docTitle: row.title };
                     if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
@@ -2148,15 +2142,16 @@
             showToast("PDF ортақ базаға жүктелуде...");
             const uploaded = await uploadFileToStorage(file, `clubs/club_${currentClubId}`, 'pdf');
             if (!uploaded) return;
-            const { error } = await sb.from('documents').insert([{
+            const { data, error } = await sb.from('documents').insert([{
                 title: docTitle, category: 'club_pdf', doc_date: new Date().toISOString().slice(0, 10),
                 content: { clubId: currentClubId, section: currentClubSection || 'plan', docTitle, fileName: file.name, fileUrl: uploaded.publicUrl, storagePath: uploaded.storagePath }
-            }]);
+            }]).select();
             if (!error) {
                 titleInp.value = '';
                 fileInp.value = '';
                 await syncAllFromSupabase(false);
                 renderClubModalDocs();
+                if (data && data[0]) previewClubDocById(String(data[0].id));
                 showToast("PDF құжат ортақ базаға сақталды!");
             }
         }
@@ -2170,22 +2165,25 @@
                 listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Бұл бөлімде әзірге PDF құжат жоқ.</div>`;
                 return;
             }
-            listEl.innerHTML = docs.map(d => `
-                <div class="p-3 rounded-xl border ${Number(currentViewingClubDocId) === Number(d.id) ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                    <div onclick="previewClubDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span></div>
+            listEl.innerHTML = docs.map(d => {
+                const safeId = escapeHtml(String(d.id));
+                const isSelected = String(currentViewingClubDocId) === String(d.id);
+                return `
+                <div class="p-3 rounded-xl border ${isSelected ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewClubDocById('${safeId}')" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span></div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="previewClubDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="openEditClubDocModal(${d.id})" title="Өзгерту" class="admin-only p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        <button type="button" onclick="deleteClubDocById(${d.id})" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="previewClubDocById('${safeId}')" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="openEditClubDocModal('${safeId}')" title="Өзгерту" class="admin-only p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteClubDocById('${safeId}')" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             lucide.createIcons();
         }
 
         function openEditClubDocModal(docId) {
             if (!ensureAdminAccess()) return;
-            const doc = cloudPdfCache.club.find(d => Number(d.id) === Number(docId));
+            const doc = cloudPdfCache.club.find(d => String(d.id) === String(docId));
             if (!doc) return;
             editingClubDoc = doc;
             document.getElementById('edit-club-doc-title').value = doc.docTitle;
@@ -2210,9 +2208,9 @@
                 if (storagePath) await deleteFileFromStorage(storagePath);
                 fileUrl = uploaded.publicUrl; storagePath = uploaded.storagePath; fileName = newFile.name;
             }
-            await sb.from('documents').update({ title: newTitle, content: { clubId: editingClubDoc.clubId, section: editingClubDoc.section || 'plan', docTitle: newTitle, fileName, fileUrl, storagePath } }).eq('id', editingClubDoc.id);
-            const wasViewing = Number(currentViewingClubDocId) === Number(editingClubDoc.id);
-            const editedId = editingClubDoc.id;
+            await sb.from('documents').update({ title: newTitle, content: { clubId: editingClubDoc.clubId, section: editingClubDoc.section || 'plan', docTitle: newTitle, fileName, fileUrl, storagePath } }).eq('id', String(editingClubDoc.id));
+            const wasViewing = String(currentViewingClubDocId) === String(editingClubDoc.id);
+            const editedId = String(editingClubDoc.id);
             closeEditClubDocModal();
             await syncAllFromSupabase(false);
             renderClubModalDocs();
@@ -2222,19 +2220,19 @@
 
         async function deleteClubDocById(docId) {
             if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-            const doc = cloudPdfCache.club.find(d => Number(d.id) === Number(docId));
+            const doc = cloudPdfCache.club.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-            await sb.from('documents').delete().eq('id', docId);
-            if (Number(currentViewingClubDocId) === Number(docId)) resetClubPdfViewer();
+            await sb.from('documents').delete().eq('id', String(docId));
+            if (String(currentViewingClubDocId) === String(docId)) resetClubPdfViewer();
             await syncAllFromSupabase(false);
             renderClubModalDocs();
             showToast("PDF құжат өшірілді!");
         }
 
         function previewClubDocById(docId) {
-            const doc = cloudPdfCache.club.find(d => Number(d.id) === Number(docId));
+            const doc = cloudPdfCache.club.find(d => String(d.id) === String(docId));
             if (!doc || !doc.fileUrl) return;
-            currentViewingClubPdfUrl = doc.fileUrl; currentViewingClubPdfDoc = doc; currentViewingClubDocId = doc.id;
+            currentViewingClubPdfUrl = doc.fileUrl; currentViewingClubPdfDoc = doc; currentViewingClubDocId = String(doc.id);
             document.getElementById('club-pdf-viewer-title').textContent = doc.docTitle;
             document.getElementById('club-pdf-iframe').src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
             document.getElementById('club-pdf-empty-state').classList.add('hidden');
@@ -2367,7 +2365,7 @@
             if (!error) {
                 titleInp.value = ''; fileInp.value = '';
                 await syncAllFromSupabase(false);
-                if (data && data[0]) previewPaidDocById(data[0].id);
+                if (data && data[0]) previewPaidDocById(String(data[0].id));
                 showToast("Альбомдық PDF ортақ базаға сақталды!");
             }
         }
@@ -2380,22 +2378,24 @@
                 listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500 bg-white">Ақылы қызмет бойынша альбомдық PDF құжаттар әзірге жоқ.</div>`;
                 return;
             }
-            listEl.innerHTML = docs.map(d => `
+            listEl.innerHTML = docs.map(d => {
+                const safeId = escapeHtml(String(d.id));
+                return `
                 <div class="p-3 rounded-xl border ${String(currentViewingPaidDocId) === String(d.id) ? 'border-brand-teal bg-brand-cream/80 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                    <div onclick="previewPaidDocById('${d.id}')" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span></div>
+                    <div onclick="previewPaidDocById('${safeId}')" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span></div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="previewPaidDocById('${d.id}')" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="deletePaidDocById('${d.id}')" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="previewPaidDocById('${safeId}')" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="deletePaidDocById('${safeId}')" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             lucide.createIcons();
         }
 
         function previewPaidDocById(docId) {
-            const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId)
+            const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId));
             if (!doc || !doc.fileUrl) return;
-            currentViewingPaidPdfUrl = doc.fileUrl; currentViewingPaidPdfDoc = doc; currentViewingPaidDocId = doc.id;
+            currentViewingPaidPdfUrl = doc.fileUrl; currentViewingPaidPdfDoc = doc; currentViewingPaidDocId = String(doc.id);
             document.getElementById('paid-pdf-viewer-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
             document.getElementById('paid-fs-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
             document.getElementById('paid-pdf-iframe').src = doc.fileUrl;
@@ -2409,7 +2409,7 @@
             if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-            await sb.from('documents').delete().eq('id', docId);
+            await sb.from('documents').delete().eq('id', String(docId));
             if (String(currentViewingPaidDocId) === String(docId)) resetPaidPdfViewer();
             await syncAllFromSupabase(false);
             showToast("PDF құжат өшірілді!");
@@ -2646,204 +2646,6 @@
             const iframe = document.getElementById('staff-pdf-iframe');
             iframe.src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
 
-            document.getElementById('staff-pdf-empty-state').classList.add('hidden');
-            document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
-            renderStaffModalDocs();
-        }
-
-        function resetStaffPdfViewer() {
-            currentViewingPdfUrl = null;
-            currentViewingPdfDoc = null;
-            currentViewingDocId = null;
-            const iframe = document.getElementById('staff-pdf-iframe');
-            if (iframe) iframe.src = '';
-            document.getElementById('staff-pdf-viewer-box')?.classList.add('hidden');
-            document.getElementById('staff-pdf-empty-state')?.classList.remove('hidden');
-        }
-
-        async function openStaffModal(staffId) {
-            if (!ensureAdminAccess()) return;
-            const staff = STAFF_DATA.find(s => Number(s.id) === Number(staffId));
-            if (!staff) return;
-            currentStaffId = Number(staffId);
-            resetStaffPdfViewer();
-            document.getElementById('staff-modal-avatar').textContent = staff.name.charAt(0);
-            document.getElementById('staff-modal-name').textContent = staff.name;
-            document.getElementById('staff-modal-role').textContent = staff.role;
-            document.getElementById('staff-modal-resp').textContent = staff.resp;
-            renderStaffModalDocs();
-            document.getElementById('staff-dossier-modal').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeStaffModal() {
-            document.getElementById('staff-dossier-modal').classList.add('hidden');
-            currentStaffId = null;
-            resetStaffPdfViewer();
-        }
-
-        async function handleStaffPdfUpload(e) {
-            e.preventDefault();
-            if (!ensureAdminAccess() || !currentStaffId) return;
-            const titleInp = document.getElementById('staff-doc-title');
-            const fileInp = document.getElementById('staff-doc-file');
-            const docTitle = titleInp.value.trim();
-            const file = fileInp.files[0];
-            if (!docTitle || !file) { showToast("Құжат атауы мен PDF файлды таңдаңыз!"); return; }
-
-            showToast("Қызметкер құжаты жүктелуде...");
-            const uploaded = await uploadFileToStorage(file, `staff/staff_${currentStaffId}`, 'pdf');
-            if (!uploaded) return;
-
-            const payload = {
-                title: docTitle,
-                category: 'staff_pdf',
-                doc_date: new Date().toISOString().slice(0, 10),
-                content: {
-                    staffId: Number(currentStaffId),
-                    docTitle,
-                    fileName: file.name,
-                    fileUrl: uploaded.publicUrl,
-                    storagePath: uploaded.storagePath
-                }
-            };
-
-            const { data, error } = await sb.from('documents').insert([payload]).select();
-            if (error) {
-                console.error("Supabase insert қатесі:", error);
-                showToast("Базаға жазу қатесі: " + error.message);
-                return;
-            }
-
-            titleInp.value = '';
-            fileInp.value = '';
-            await syncAllFromSupabase(false);
-            renderStaffModalDocs();
-            if (data && data[0]) previewStaffDocById(data[0].id);
-            showToast("Қызметкер құжаты сәтті сақталды!");
-        }
-
-        function renderStaffModalDocs() {
-            if (!isAdminMode || !currentStaffId) return;
-            const docs = cloudPdfCache.staff.filter(d => Number(d.staffId) === Number(currentStaffId));
-            const badge = document.getElementById('staff-docs-count-badge');
-            if (badge) badge.textContent = `${docs.length} құжат`;
-
-            const listEl = document.getElementById('staff-docs-list');
-            if (!listEl) return;
-
-            if (docs.length === 0) {
-                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
-                return;
-            }
-
-            listEl.innerHTML = docs.map(d => `
-                <div class="p-3 rounded-xl border ${Number(currentViewingDocId) === Number(d.id) ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                    <div onclick="previewStaffDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer">
-                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-                    </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="previewStaffDocById(${d.id})" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="openEditStaffDocModal(${d.id})" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        <button type="button" onclick="deleteStaffDocById(${d.id})" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function openEditStaffDocModal(docId) {
-            if (!ensureAdminAccess()) return;
-            const doc = cloudPdfCache.staff.find(d => Number(d.id) === Number(docId));
-            if (!doc) { showToast("Құжат табылмады!"); return; }
-            editingStaffDoc = doc;
-            document.getElementById('edit-staff-doc-title').value = doc.docTitle;
-            document.getElementById('edit-staff-doc-file').value = '';
-            document.getElementById('edit-staff-doc-current-file').textContent = `Ағымдағы файл: ${doc.fileName}`;
-            document.getElementById('edit-staff-doc-modal').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeEditStaffDocModal() {
-            editingStaffDoc = null;
-            document.getElementById('edit-staff-doc-modal').classList.add('hidden');
-        }
-
-        async function handleSaveEditedStaffDoc(e) {
-            e.preventDefault();
-            if (!ensureAdminAccess() || !editingStaffDoc) return;
-            const newTitle = document.getElementById('edit-staff-doc-title').value.trim();
-            const newFile = document.getElementById('edit-staff-doc-file').files[0];
-            if (!newTitle) return;
-
-            let fileUrl = editingStaffDoc.fileUrl;
-            let storagePath = editingStaffDoc.storagePath;
-            let fileName = editingStaffDoc.fileName;
-
-            if (newFile) {
-                showToast("Жаңа PDF жүктелуде...");
-                const uploaded = await uploadFileToStorage(newFile, `staff/staff_${editingStaffDoc.staffId}`, 'pdf');
-                if (!uploaded) return;
-                if (storagePath) await deleteFileFromStorage(storagePath);
-                fileUrl = uploaded.publicUrl;
-                storagePath = uploaded.storagePath;
-                fileName = newFile.name;
-            }
-
-            const { error } = await sb.from('documents').update({
-                title: newTitle,
-                content: {
-                    staffId: Number(editingStaffDoc.staffId),
-                    docTitle: newTitle,
-                    fileName,
-                    fileUrl,
-                    storagePath
-                }
-            }).eq('id', editingStaffDoc.id);
-
-            if (error) {
-                console.error("Update қатесі:", error);
-                showToast("Өзгерту қатесі: " + error.message);
-                return;
-            }
-
-            const wasViewing = Number(currentViewingDocId) === Number(editingStaffDoc.id);
-            const editedId = editingStaffDoc.id;
-            closeEditStaffDocModal();
-            await syncAllFromSupabase(false);
-            renderStaffModalDocs();
-            if (wasViewing) previewStaffDocById(editedId);
-            showToast("Құжат сәтті жаңартылды!");
-        }
-
-        async function deleteStaffDocById(docId) {
-            if (!ensureAdminAccess()) return;
-            if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-            const doc = cloudPdfCache.staff.find(d => Number(d.id) === Number(docId));
-            if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-            const { error } = await sb.from('documents').delete().eq('id', docId);
-            if (error) {
-                console.error("Delete қатесі:", error);
-                showToast("Өшіру қатесі: " + error.message);
-                return;
-            }
-            if (Number(currentViewingDocId) === Number(docId)) resetStaffPdfViewer();
-            await syncAllFromSupabase(false);
-            renderStaffModalDocs();
-            showToast("Құжат сәтті өшірілді!");
-        }
-
-        function previewStaffDocById(docId) {
-            if (!ensureAdminAccess()) return;
-            const doc = cloudPdfCache.staff.find(d => Number(d.id) === Number(docId));
-            if (!doc || !doc.fileUrl) { showToast("PDF сілтемесі табылмады!"); return; }
-            currentViewingPdfUrl = doc.fileUrl;
-            currentViewingPdfDoc = doc;
-            currentViewingDocId = doc.id;
-            document.getElementById('staff-pdf-viewer-title').textContent = doc.docTitle;
-            const iframe = document.getElementById('staff-pdf-iframe');
-            iframe.src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
             document.getElementById('staff-pdf-empty-state').classList.add('hidden');
             document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
             renderStaffModalDocs();
