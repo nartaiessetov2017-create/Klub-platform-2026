@@ -379,7 +379,7 @@
             font-size: 13.5px;
         }
 
-        /* FACEBOOK ПАРАҚШАСЫ БӨЛІМІ */
+        /* FACEBOOK ПАРАҚШАСЫ БӨЛІМІ (ҚАЙТАЛАУСЫЗ ТАЗА НҰСҚА) */
         .fb-showcase-wrapper {
             background: linear-gradient(135deg, #f8fbff 0%, #eef5fc 100%);
             border: 2px solid #cbd5e1;
@@ -427,10 +427,10 @@
         }
 
         .fb-info-card-banner {
-            height: 70px;
+            height: 64px;
             background-color: #1d4ed8;
             background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.16' stroke-width='1.5'%3E%3Cpath d='M30 5 L38 17 L52 15 L45 28 L55 38 L41 42 L38 56 L30 46 L22 56 L19 42 L5 38 L15 28 L8 15 L22 17 Z'/%3E%3Ccircle cx='30' cy='30' r='6'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
-            padding: 14px 18px;
+            padding: 14px 20px;
             display: flex;
             align-items: center;
         }
@@ -439,7 +439,7 @@
             border-radius: 22px;
             overflow: hidden;
             position: relative;
-            min-height: 410px;
+            min-height: 360px;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
             background: #1e3a8a;
             border: 1px solid #cbd5e1;
@@ -462,23 +462,11 @@
             inset: 0;
             background: linear-gradient(
                 to top,
-                rgba(15, 45, 115, 0.92) 0%,
-                rgba(23, 62, 148, 0.45) 36%,
+                rgba(15, 45, 115, 0.72) 0%,
+                rgba(23, 62, 148, 0.25) 35%,
                 rgba(0, 0, 0, 0.04) 68%
             );
             pointer-events: none;
-        }
-
-        .club-title {
-            position: absolute;
-            bottom: 22px;
-            left: 24px;
-            right: 88px;
-            color: #ffffff;
-            font-size: 25px;
-            font-weight: 800;
-            line-height: 1.25;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
         #printable-area { display: none; }
@@ -862,7 +850,7 @@
             </div>
         </section>
 
-        <!-- 6. КЛУБТЫҢ FACEBOOK ПАРАҚШАСЫ (ЕСКІ НҰСҚА ТОЛЫҚ ӨШІРІЛІП, СУРЕТТЕГІДЕЙ ЖАҢАРТЫЛДЫ) -->
+        <!-- 6. КЛУБТЫҢ FACEBOOK ПАРАҚШАСЫ (ҚАЙТАЛАНУСЫЗ ТАЗА НҰСҚА) -->
         <section id="section-facebook-page" class="hidden space-y-6">
             <input type="file" id="fb-club-photo-input" accept="image/*" class="hidden" onchange="handleFbClubPhotoSelected(event)">
 
@@ -873,7 +861,7 @@
                     <path d="M115 55 C85 65, 75 95, 98 105 C112 110, 118 90, 102 86"/>
                 </svg>
 
-                <!-- ЖОҒАРҒЫ ШАПКА -->
+                <!-- ЖОҒАРҒЫ ШАПКА (Тақырып пен сипаттама осында 1 рет қана көрсетіледі) -->
                 <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 rounded-full bg-gradient-to-b from-[#2b7fff] to-[#155dfc] text-white flex items-center justify-center shadow-lg shrink-0">
@@ -881,10 +869,10 @@
                         </div>
                         <div>
                             <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
-                                «Жаңақұрылыс ауылдық клубы»<br class="hidden sm:inline"> Facebook парақшасы
+                                «Жаңақұрылыс ауылдық клубы» Facebook парақшасы
                             </h2>
                             <p class="text-xs sm:text-sm text-slate-600 mt-1">
-                                Мәдениет ошағының ресми әлеуметтік желідегі жаңалықтары,<br class="hidden md:inline"> фото-бейне есептері және іс-шаралары.
+                                Мәдениет ошағының ресми әлеуметтік желідегі жаңалықтары, концерттер, үйірме жұмыстары және фото-бейне есептері.
                             </p>
                         </div>
                     </div>
@@ -931,59 +919,44 @@
 
                 <!-- НЕГІЗГІ 2 БАҒАНДЫ (.facebook-section) БЛОК -->
                 <div class="facebook-section relative z-10">
-                    <!-- СОЛ ЖАҚ: РЕСМИ FACEBOOK ПАРАҚША КАРТОЧКАСЫ -->
+                    <!-- СОЛ ЖАҚ: БАЙЛАНЫС ДЕРЕКТЕРІ МЕН НЕГІЗГІ БАТЫРМА (ҚАЙТАЛАНУСЫЗ) -->
                     <div class="fb-info-card">
                         <div>
                             <div class="fb-info-card-banner">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-900 text-xs font-extrabold shadow-sm">
+                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white text-slate-900 text-xs font-extrabold shadow-sm">
                                     <i data-lucide="landmark" class="w-3.5 h-3.5 text-amber-500"></i>
-                                    <span>Ресми Facebook парақша</span>
+                                    <span>Ресми байланыс деректері</span>
                                 </span>
                             </div>
 
-                            <div class="p-5 sm:p-6 space-y-4">
-                                <div class="flex items-start gap-3.5">
-                                    <div class="w-14 h-14 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center shadow-md shrink-0">
-                                        <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+                            <div class="p-6 space-y-4">
+                                <div class="space-y-3 text-sm text-slate-700">
+                                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-[#1877F2] shrink-0 mt-0.5"></i>
+                                        <div>
+                                            <span class="block text-[11px] font-bold uppercase text-slate-400">Мекенжайы</span>
+                                            <span class="font-bold text-slate-900">Арал ауданы, Жаңақұрылыс елді мекені</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
-                                            Жаңақұрылыс<br>Ауылдық Клубы
-                                        </h3>
-                                        <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
-                                            Мәдени іс-шаралар, концерттер, үйірме жұмыстары және ауыл жаңалықтары.
-                                        </p>
+                                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <i data-lucide="user" class="w-5 h-5 text-[#1877F2] shrink-0 mt-0.5"></i>
+                                        <div>
+                                            <span class="block text-[11px] font-bold uppercase text-slate-400">Меңгерушісі</span>
+                                            <span class="font-bold text-slate-900">Есетов Нартай Серікұлы</span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="border-t border-slate-100 pt-3.5 space-y-2.5 text-xs sm:text-sm text-slate-700">
-                                    <div class="flex items-center gap-2.5">
-                                        <i data-lucide="map-pin" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
-                                        <span><strong>Мекенжайы:</strong> Арал ауданы, Жаңақұрылыс елді мекені</span>
-                                    </div>
-                                    <div class="flex items-center gap-2.5">
-                                        <i data-lucide="user" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
-                                        <span><strong>Меңгерушісі:</strong> Есетов Нартай Серікұлы</span>
-                                    </div>
-                                    <div class="flex items-center gap-2.5">
-                                        <i data-lucide="phone" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
-                                        <span><strong>Байланыс:</strong> +7 775 638 10 20</span>
-                                    </div>
-                                    <div class="flex items-center gap-2.5">
-                                        <i data-lucide="link-2" class="w-4 h-4 text-[#1877F2] shrink-0"></i>
-                                        <span>
-                                            <strong>Facebook:</strong>
-                                            <a id="fb-inline-open-link" href="#" target="_blank" rel="noopener noreferrer" class="text-[#1877F2] hover:underline font-extrabold inline-flex items-center gap-1 ml-1">
-                                                <span>Парақшаға өту</span>
-                                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                                            </a>
-                                        </span>
+                                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <i data-lucide="phone" class="w-5 h-5 text-[#1877F2] shrink-0 mt-0.5"></i>
+                                        <div>
+                                            <span class="block text-[11px] font-bold uppercase text-slate-400">Байланыс нөмірі</span>
+                                            <span class="font-bold text-slate-900">+7 775 638 10 20</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="px-5 sm:px-6 pb-6">
+                        <div class="px-6 pb-6">
                             <a id="fb-direct-open-link" href="#" target="_blank" rel="noopener noreferrer"
                                class="w-full py-3.5 px-5 rounded-full bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e3a8a] text-white font-extrabold text-sm shadow-lg hover:shadow-xl flex items-center justify-center gap-2.5 transition">
                                 <span class="w-6 h-6 rounded-full bg-white text-[#1d4ed8] flex items-center justify-center font-black text-sm">f</span>
@@ -993,7 +966,7 @@
                         </div>
                     </div>
 
-                    <!-- ОҢ ЖАҚ: КЛУБ ҒИМАРАТЫНЫҢ СУРЕТІ + КӨК ГРАДИЕНТ + АЛТЫН ОЮ -->
+                    <!-- ОҢ ЖАҚ: КЛУБ ҒИМАРАТЫНЫҢ СУРЕТІ -->
                     <div class="club-photo">
                         <img id="fb-club-photo-img" src="" alt="Жаңақұрылыс ауылдық клубы">
                         <div class="club-overlay"></div>
@@ -1002,14 +975,6 @@
                             <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1d4ed8]/90 backdrop-blur-xs text-white text-xs font-extrabold shadow-md border border-white/25">
                                 <i data-lucide="landmark" class="w-3.5 h-3.5 text-amber-300"></i>
                                 <span>Мәдениет ошағы</span>
-                            </span>
-                        </div>
-
-                        <div class="club-title z-10">
-                            
-                            <span class="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-100 mt-1.5">
-                                <i data-lucide="map-pin" class="w-4 h-4 text-amber-300 shrink-0"></i>
-                                <span></span>
                             </span>
                         </div>
 
@@ -1803,13 +1768,11 @@
         // ==================== FACEBOOK ПАРАҚША ФУНКЦИЯЛАРЫ ====================
         function applyFacebookPageUI() {
             const topLink = document.getElementById('fb-top-open-link');
-            const inlineLink = document.getElementById('fb-inline-open-link');
             const directLink = document.getElementById('fb-direct-open-link');
             const urlInput = document.getElementById('fb-url-input');
             const photoImg = document.getElementById('fb-club-photo-img');
 
             if (topLink) topLink.href = currentFbUrl;
-            if (inlineLink) inlineLink.href = currentFbUrl;
             if (directLink) directLink.href = currentFbUrl;
             if (urlInput) urlInput.value = currentFbUrl;
             if (photoImg) photoImg.src = currentFbPhotoUrl || CLUB_BUILDING_SVG;
