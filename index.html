@@ -758,7 +758,7 @@
             <div class="flex items-center gap-2.5 min-w-0"><i data-lucide="file-text" class="w-5 h-5 text-brand-gold shrink-0"></i><h4 id="paid-fs-title" class="text-sm sm:text-base font-extrabold truncate">Альбомдық PDF құжат</h4></div>
             <div class="flex items-center gap-2 shrink-0">
                 <button type="button" onclick="downloadCurrentPaidPdf()" class="px-3.5 py-1.5 rounded-xl bg-brand-gold hover:bg-amber-400 text-brand-tealDark text-xs font-extrabold cursor-pointer">Жүктеу</button>
-                <button type="button" onclick="closePaidServiceFullscreen()" title="Жабу (ESC)" class="w-9 h-9 rounded-xl bg-rose-600 hover:bg-rose-700 flex items-center justify-center text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="closePaidServiceFullscreen()" title="Жабу (ESC)" class="w-9 h-9 rounded-xl bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
         <div class="flex-1 p-3 sm:p-5 flex items-center justify-center overflow-auto">
@@ -1104,9 +1104,12 @@
             currentFbPhotoUrl = uploaded.publicUrl;
             applyFacebookPageUI();
             const payload = { title: 'Клубтың Facebook парақшасы', category: 'facebook_link', doc_date: new Date().toISOString().slice(0, 10), content: { url: currentFbUrl, photoUrl: currentFbPhotoUrl } };
-            if (currentFbRowId) await sb.from('documents').update(payload).eq('id', currentFbRowId);
-            else {
-                const { data } = await sb.from('documents').insert([payload]).select();
+            if (currentFbRowId) {
+                const { error } = await sb.from('documents').update(payload).eq('id', currentFbRowId);
+                if (error) { showToast("Сақтау қатесі: " + error.message); return; }
+            } else {
+                const { data, error } = await sb.from('documents').insert([payload]).select();
+                if (error) { showToast("Сақтау қатесі: " + error.message); return; }
                 if (data && data[0]) currentFbRowId = data[0].id;
             }
             showToast("Клуб суреті сәтті жаңартылды!");
@@ -1125,9 +1128,12 @@
             currentFbUrl = newUrl;
             applyFacebookPageUI();
             const payload = { title: 'Клубтың Facebook парақшасы', category: 'facebook_link', doc_date: new Date().toISOString().slice(0, 10), content: { url: newUrl, photoUrl: currentFbPhotoUrl } };
-            if (currentFbRowId) await sb.from('documents').update(payload).eq('id', currentFbRowId);
-            else {
-                const { data } = await sb.from('documents').insert([payload]).select();
+            if (currentFbRowId) {
+                const { error } = await sb.from('documents').update(payload).eq('id', currentFbRowId);
+                if (error) { showToast("Сақтау қатесі: " + error.message); return; }
+            } else {
+                const { data, error } = await sb.from('documents').insert([payload]).select();
+                if (error) { showToast("Сақтау қатесі: " + error.message); return; }
                 if (data && data[0]) currentFbRowId = data[0].id;
             }
             document.getElementById('fb-settings-form')?.classList.add('hidden');
@@ -1135,11 +1141,22 @@
         }
 
         // ==================== SUPABASE STORAGE ЖӘНЕ ОРТАҚ БАЗА ====================
+        function resolveMimeType(file, ext) {
+            if (file && file.type && file.type !== 'application/octet-stream') return file.type;
+            if (ext === 'pdf') return 'application/pdf';
+            if (ext === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            if (ext === 'txt') return 'text/plain;charset=utf-8';
+            return 'application/octet-stream';
+        }
+
         async function uploadFileToStorage(file, folder, forcedExt = null) {
-            const ext = forcedExt || (file.name.split('.').pop() || 'bin').toLowerCase();
+            const ext = (forcedExt || (file.name.split('.').pop() || 'bin')).toLowerCase();
             const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
             const filePath = `${folder}/${safeName}`;
-            const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+            const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file, {
+                contentType: resolveMimeType(file, ext),
+                upsert: true
+            });
             if (uploadError) {
                 console.error("Storage жүктеу қатесі:", uploadError);
                 showToast("Файлды ортақ бұлтқа жүктеу қатесі: " + uploadError.message);
@@ -1151,7 +1168,8 @@
 
         async function deleteFileFromStorage(storagePath) {
             if (!storagePath) return;
-            await sb.storage.from(BUCKET_NAME).remove([storagePath]);
+            const { error } = await sb.storage.from(BUCKET_NAME).remove([storagePath]);
+            if (error) console.warn("Storage өшіру ескертпесі:", error.message);
         }
 
         function serializeEventForCloud(ev) {
@@ -1162,37 +1180,51 @@
         }
 
         async function saveEventToSupabase(ev) {
-            if (!sb || !ev || !ensureAdminAccess()) return;
+            if (!sb || !ev || !ensureAdminAccess()) return false;
             const cleanObj = serializeEventForCloud(ev);
             const payload = { title: ev.title, category: 'annual_event', doc_date: ev.date || new Date().toISOString().slice(0, 10), content: cleanObj };
-            if (ev._supaRowId) await sb.from('documents').update(payload).eq('id', ev._supaRowId);
-            else {
+            if (ev._supaRowId) {
+                const { error } = await sb.from('documents').update(payload).eq('id', ev._supaRowId);
+                if (error) { console.error("Event update қатесі:", error); showToast("Базаға жаңарту қатесі: " + error.message); return false; }
+            } else {
                 const { data, error } = await sb.from('documents').insert([payload]).select();
-                if (!error && data && data[0]) ev._supaRowId = data[0].id;
+                if (error) { console.error("Event insert қатесі:", error); showToast("Базаға сақтау қатесі: " + error.message); return false; }
+                if (data && data[0]) ev._supaRowId = data[0].id;
             }
+            return true;
         }
 
         async function saveMtbPassportToSupabase(html) {
-            if (!ensureAdminAccess()) return;
+            if (!ensureAdminAccess()) return false;
             currentMtbHtml = html;
-            if (!sb) return;
+            if (!sb) return true;
             const payload = { title: 'МТБ - Негізгі паспорт', category: 'mtb_passport', doc_date: new Date().toISOString().slice(0, 10), content: { html } };
-            if (currentMtbRowId) await sb.from('documents').update(payload).eq('id', currentMtbRowId);
-            else {
+            if (currentMtbRowId) {
+                const { error } = await sb.from('documents').update(payload).eq('id', currentMtbRowId);
+                if (error) { showToast("МТБ сақтау қатесі: " + error.message); return false; }
+            } else {
                 const { data, error } = await sb.from('documents').insert([payload]).select();
-                if (!error && data && data[0]) currentMtbRowId = data[0].id;
+                if (error) { showToast("МТБ сақтау қатесі: " + error.message); return false; }
+                if (data && data[0]) currentMtbRowId = data[0].id;
             }
+            return true;
         }
 
         async function syncAllFromSupabase(showNotify = false) {
             if (!sb) return;
             try {
-                const { data, error } = await sb.from('documents').select('*').order('id', { ascending: true });
+                const { data, error } = await sb.from('documents').select('*').order('created_at', { ascending: true });
+                let rows = data;
                 if (error) {
-                    if (showNotify) showToast("Ортақ базамен байланысу қатесі: " + error.message);
-                    return;
+                    const fallback = await sb.from('documents').select('*');
+                    if (fallback.error) {
+                        if (showNotify) showToast("Ортақ базамен байланысу қатесі: " + fallback.error.message);
+                        return;
+                    }
+                    rows = fallback.data;
                 }
-                const rows = data || [];
+                rows = rows || [];
+
                 const mergedMap = new Map();
                 DEFAULT_EVENTS.forEach(defEv => mergedMap.set(Number(defEv.id), { ...defEv, originalTitle: defEv.title }));
                 rows.filter(r => r.category === 'annual_event').forEach(row => {
@@ -1251,6 +1283,7 @@
                 if (showNotify) showToast("Барлық құжаттар ортақ базадан жаңартылды!");
             } catch (err) {
                 console.error("Синхрондау қатесі:", err);
+                if (showNotify) showToast("Базадан дерек алу кезінде қате шықты.");
             }
         }
 
@@ -1556,19 +1589,20 @@
                     if (!ev.rawDocxBuffers) ev.rawDocxBuffers = {};
                     ev.rawDocxBuffers[secKey] = arrayBuffer;
                     const uploaded = await uploadFileToStorage(file, `events/event_${ev.id}/${secKey}`, 'docx');
-                    if (uploaded) {
-                        if (!ev.docxUrls) ev.docxUrls = {};
-                        if (!ev.docxStoragePaths) ev.docxStoragePaths = {};
-                        ev.docxUrls[secKey] = uploaded.publicUrl;
-                        ev.docxStoragePaths[secKey] = uploaded.storagePath;
-                    }
+                    if (!uploaded) return;
+                    if (!ev.docxUrls) ev.docxUrls = {};
+                    if (!ev.docxStoragePaths) ev.docxStoragePaths = {};
+                    ev.docxUrls[secKey] = uploaded.publicUrl;
+                    ev.docxStoragePaths[secKey] = uploaded.storagePath;
+
                     const result = await mammoth.convertToHtml({ arrayBuffer }, { convertImage: mammoth.images.imgElement(img => img.read("base64").then(buf => ({ src: "data:" + img.contentType + ";base64," + buf }))) });
                     const htmlContent = sanitizeRichHtml(result.value || '');
                     ev[secKey] = htmlContent;
                     ev[`${secKey}_pages`] = [htmlContent];
                     if (!ev.fileNames) ev.fileNames = {};
                     ev.fileNames[secKey] = fileName;
-                    await saveEventToSupabase(ev);
+                    const saved = await saveEventToSupabase(ev);
+                    if (!saved) return;
                     await renderSingleCleanSection(ev, secKey);
                     switchDocTab(secKey);
                     updateTabDots(ev);
@@ -1584,7 +1618,8 @@
                     ev[`${secKey}_pages`] = [html];
                     if (!ev.fileNames) ev.fileNames = {};
                     ev.fileNames[secKey] = fileName;
-                    await saveEventToSupabase(ev);
+                    const saved = await saveEventToSupabase(ev);
+                    if (!saved) return;
                     await renderSingleCleanSection(ev, secKey);
                     switchDocTab(secKey);
                     updateTabDots(ev);
@@ -1613,7 +1648,7 @@
             }
             const pagesArr = Array.isArray(ev[`${secKey}_pages`]) && ev[`${secKey}_pages`].length > 0 ? ev[`${secKey}_pages`] : (ev[secKey] ? [ev[secKey]] : []);
             const rawContent = ev[secKey] || '';
-            const hasContent = Boolean(rawDocxBuffer) || rawContent.trim().length > 0;
+            const hasContent = Boolean(rawDocxBuffer) || rawContent.trim().length > 0 || Boolean(ev.docxUrls && ev.docxUrls[secKey]);
             const emptyHint = document.getElementById(`empty-hint-${secKey}`);
             const exactContainer = document.getElementById(`docx-exact-view-${secKey}`);
             const pagesStack = document.getElementById(`pages-stack-${secKey}`);
@@ -1671,7 +1706,8 @@
             delete ev[`${secKey}_pages`];
             if (ev.rawDocxBuffers) delete ev.rawDocxBuffers[secKey];
             if (ev.fileNames) delete ev.fileNames[secKey];
-            await saveEventToSupabase(ev);
+            const saved = await saveEventToSupabase(ev);
+            if (!saved) return;
             await renderSingleCleanSection(ev, secKey);
             updateTabDots(ev);
             renderQuartersSelector();
@@ -1692,10 +1728,17 @@
             const ev = eventsData.find(item => item.id === eventId);
             if (!ev) return;
             currentEventId = eventId;
+            currentDocTab = defaultTab;
             document.getElementById('modal-event-title').textContent = ev.title;
             document.getElementById('modal-event-date-badge').textContent = `${ev.date} • ${ev.time}`;
             updateTabDots(ev);
-            switchDocTab(defaultTab);
+            document.querySelectorAll('.doc-pane').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`doc-content-${defaultTab}`)?.classList.remove('hidden');
+            document.querySelectorAll('.doc-tab-btn').forEach(btn => {
+                btn.className = (btn.dataset.doctab === defaultTab)
+                    ? 'doc-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition cursor-pointer bg-brand-teal text-white shadow'
+                    : 'doc-tab-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer text-slate-700 hover:bg-brand-gold/20';
+            });
             document.getElementById('document-modal').classList.remove('hidden');
             await renderSingleCleanSection(ev, defaultTab);
             lucide.createIcons();
@@ -1746,7 +1789,8 @@
             ev[sec] = pagesHtml.join('<div style="page-break-before:always;"></div>');
             if (ev.rawDocxBuffers) delete ev.rawDocxBuffers[sec];
             if (ev.docxUrls) delete ev.docxUrls[sec];
-            await saveEventToSupabase(ev);
+            const saved = await saveEventToSupabase(ev);
+            if (!saved) return;
             await renderSingleCleanSection(ev, sec);
             updateTabDots(ev);
             renderQuartersSelector();
@@ -2022,8 +2066,9 @@
             const parts = dateRaw.split(',');
             const newId = eventsData.length > 0 ? Math.max(...eventsData.map(x => x.id)) + 1 : 1;
             const newEv = { id: newId, quarter: qId, month, title, originalTitle: title, date: parts[0].trim(), time: (parts[1] || '15:00').trim() };
+            const saved = await saveEventToSupabase(newEv);
+            if (!saved) return;
             eventsData.push(newEv);
-            await saveEventToSupabase(newEv);
             closeAddEventModal();
             selectQuarter(qId);
             await openEventModal(newId, 'scenario');
@@ -2146,14 +2191,17 @@
                 title: docTitle, category: 'club_pdf', doc_date: new Date().toISOString().slice(0, 10),
                 content: { clubId: currentClubId, section: currentClubSection || 'plan', docTitle, fileName: file.name, fileUrl: uploaded.publicUrl, storagePath: uploaded.storagePath }
             }]).select();
-            if (!error) {
-                titleInp.value = '';
-                fileInp.value = '';
-                await syncAllFromSupabase(false);
-                renderClubModalDocs();
-                if (data && data[0]) previewClubDocById(String(data[0].id));
-                showToast("PDF құжат ортақ базаға сақталды!");
+            if (error) {
+                console.error("Club PDF insert қатесі:", error);
+                showToast("Базаға сақтау қатесі: " + error.message);
+                return;
             }
+            titleInp.value = '';
+            fileInp.value = '';
+            await syncAllFromSupabase(false);
+            renderClubModalDocs();
+            if (data && data[0]) previewClubDocById(String(data[0].id));
+            showToast("PDF құжат ортақ базаға сақталды!");
         }
 
         function renderClubModalDocs() {
@@ -2208,7 +2256,8 @@
                 if (storagePath) await deleteFileFromStorage(storagePath);
                 fileUrl = uploaded.publicUrl; storagePath = uploaded.storagePath; fileName = newFile.name;
             }
-            await sb.from('documents').update({ title: newTitle, content: { clubId: editingClubDoc.clubId, section: editingClubDoc.section || 'plan', docTitle: newTitle, fileName, fileUrl, storagePath } }).eq('id', String(editingClubDoc.id));
+            const { error } = await sb.from('documents').update({ title: newTitle, content: { clubId: editingClubDoc.clubId, section: editingClubDoc.section || 'plan', docTitle: newTitle, fileName, fileUrl, storagePath } }).eq('id', String(editingClubDoc.id));
+            if (error) { showToast("Өзгерту қатесі: " + error.message); return; }
             const wasViewing = String(currentViewingClubDocId) === String(editingClubDoc.id);
             const editedId = String(editingClubDoc.id);
             closeEditClubDocModal();
@@ -2222,7 +2271,8 @@
             if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.club.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-            await sb.from('documents').delete().eq('id', String(docId));
+            const { error } = await sb.from('documents').delete().eq('id', String(docId));
+            if (error) { showToast("Өшіру қатесі: " + error.message); return; }
             if (String(currentViewingClubDocId) === String(docId)) resetClubPdfViewer();
             await syncAllFromSupabase(false);
             renderClubModalDocs();
@@ -2289,7 +2339,8 @@
             const editorEl = document.getElementById('mtb-main-editor');
             const clone = editorEl.cloneNode(true);
             clone.querySelectorAll('.resizable-img-box.selected').forEach(b => b.classList.remove('selected'));
-            await saveMtbPassportToSupabase(sanitizeRichHtml(clone.innerHTML));
+            const saved = await saveMtbPassportToSupabase(sanitizeRichHtml(clone.innerHTML));
+            if (!saved) return;
             renderMtbMainView();
             cancelMtbMainEdit();
             showToast("Материалдық-техникалық база ортақ базаға сақталды!");
@@ -2317,7 +2368,8 @@
                     const txt = await file.text();
                     htmlContent = sanitizeRichHtml(`<div class="mtb-landscape-doc">${formatDocContentForDisplay(txt)}</div>`);
                 }
-                await saveMtbPassportToSupabase(htmlContent);
+                const saved = await saveMtbPassportToSupabase(htmlContent);
+                if (!saved) return;
                 renderMtbMainView();
                 cancelMtbMainEdit();
                 showToast(`«${file.name}» жүктелді және ортақ базаға сақталды!`);
@@ -2362,12 +2414,15 @@
                 title: docTitle, category: 'paid_pdf', doc_date: new Date().toISOString().slice(0, 10),
                 content: { docTitle, fileName: file.name, orientation: 'landscape', fileUrl: uploaded.publicUrl, storagePath: uploaded.storagePath }
             }]).select();
-            if (!error) {
-                titleInp.value = ''; fileInp.value = '';
-                await syncAllFromSupabase(false);
-                if (data && data[0]) previewPaidDocById(String(data[0].id));
-                showToast("Альбомдық PDF ортақ базаға сақталды!");
+            if (error) {
+                console.error("Paid PDF insert қатесі:", error);
+                showToast("Базаға сақтау қатесі: " + error.message);
+                return;
             }
+            titleInp.value = ''; fileInp.value = '';
+            await syncAllFromSupabase(false);
+            if (data && data[0]) previewPaidDocById(String(data[0].id));
+            showToast("Альбомдық PDF ортақ базаға сақталды!");
         }
 
         function renderPaidServiceDocs() {
@@ -2409,7 +2464,8 @@
             if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-            await sb.from('documents').delete().eq('id', String(docId));
+            const { error } = await sb.from('documents').delete().eq('id', String(docId));
+            if (error) { showToast("Өшіру қатесі: " + error.message); return; }
             if (String(currentViewingPaidDocId) === String(docId)) resetPaidPdfViewer();
             await syncAllFromSupabase(false);
             showToast("PDF құжат өшірілді!");
@@ -2419,7 +2475,7 @@
         function openPaidServiceFullscreen() { if (currentViewingPaidPdfUrl) { document.getElementById('paid-pdf-fullscreen-modal').classList.remove('hidden'); lucide.createIcons(); } }
         function closePaidServiceFullscreen() { document.getElementById('paid-pdf-fullscreen-modal').classList.add('hidden'); }
 
-        // ==================== ҚЫЗМЕТКЕРЛЕР (UUID ҚОЛДАУЫМЕН ТОЛЫҚ ТҮЗЕТІЛГЕН) ====================
+        // ==================== ҚЫЗМЕТКЕРЛЕР ====================
         let currentStaffId = null, currentViewingPdfUrl = null, currentViewingPdfDoc = null, currentViewingDocId = null, editingStaffDoc = null;
 
         function updateCloudStaffCounts() {
@@ -2442,16 +2498,16 @@
             document.getElementById('staff-pdf-empty-state')?.classList.remove('hidden');
         }
 
-        async function openStaffModal(staffId) {
+        function openStaffModal(staffId) {
             if (!ensureAdminAccess()) return;
-            const staff = STAFF_DATA.find(s => Number(s.id) === Number(staffId));
-            if (!staff) return;
-            currentStaffId = Number(staffId);
+            const person = STAFF_DATA.find(s => s.id === staffId);
+            if (!person) return;
+            currentStaffId = staffId;
             resetStaffPdfViewer();
-            document.getElementById('staff-modal-avatar').textContent = staff.name.charAt(0);
-            document.getElementById('staff-modal-name').textContent = staff.name;
-            document.getElementById('staff-modal-role').textContent = staff.role;
-            document.getElementById('staff-modal-resp').textContent = staff.resp;
+            document.getElementById('staff-modal-avatar').textContent = person.name.charAt(0);
+            document.getElementById('staff-modal-name').textContent = person.name;
+            document.getElementById('staff-modal-role').textContent = person.role;
+            document.getElementById('staff-modal-resp').textContent = person.resp;
             renderStaffModalDocs();
             document.getElementById('staff-dossier-modal').classList.remove('hidden');
             lucide.createIcons();
@@ -2465,79 +2521,51 @@
 
         async function handleStaffPdfUpload(e) {
             e.preventDefault();
-            if (!ensureAdminAccess()) return;
-            if (!currentStaffId) {
-                showToast("Қызметкер таңдалмаған!");
-                return;
-            }
+            if (!ensureAdminAccess() || !currentStaffId) return;
             const titleInp = document.getElementById('staff-doc-title');
             const fileInp = document.getElementById('staff-doc-file');
             const docTitle = titleInp.value.trim();
             const file = fileInp.files[0];
-            if (!docTitle || !file) {
-                showToast("Құжат атауы мен PDF файлды таңдаңыз!");
-                return;
-            }
-
-            showToast("Қызметкер құжаты жүктелуде...");
+            if (!docTitle || !file) return;
+            showToast("Қызметкер құжаты ортақ базаға жүктелуде...");
             const uploaded = await uploadFileToStorage(file, `staff/staff_${currentStaffId}`, 'pdf');
             if (!uploaded) return;
-
-            const payload = {
-                title: docTitle,
-                category: 'staff_pdf',
-                doc_date: new Date().toISOString().slice(0, 10),
-                content: {
-                    staffId: Number(currentStaffId),
-                    docTitle,
-                    fileName: file.name,
-                    fileUrl: uploaded.publicUrl,
-                    storagePath: uploaded.storagePath
-                }
-            };
-
-            const { data, error } = await sb.from('documents').insert([payload]).select();
+            const { data, error } = await sb.from('documents').insert([{
+                title: docTitle, category: 'staff_pdf', doc_date: new Date().toISOString().slice(0, 10),
+                content: { staffId: currentStaffId, docTitle, fileName: file.name, fileUrl: uploaded.publicUrl, storagePath: uploaded.storagePath }
+            }]).select();
             if (error) {
-                console.error("Supabase insert қатесі:", error);
-                showToast("Базаға жазу қатесі: " + error.message);
+                console.error("Staff PDF insert қатесі:", error);
+                showToast("Базаға сақтау қатесі: " + error.message);
                 return;
             }
-
             titleInp.value = '';
             fileInp.value = '';
             await syncAllFromSupabase(false);
             renderStaffModalDocs();
             if (data && data[0]) previewStaffDocById(String(data[0].id));
-            showToast("Қызметкер құжаты сәтті сақталды!");
+            showToast("Қызметкер құжаты ортақ базаға сақталды!");
         }
 
         function renderStaffModalDocs() {
-            if (!isAdminMode || !currentStaffId) return;
+            if (!currentStaffId) return;
             const docs = cloudPdfCache.staff.filter(d => Number(d.staffId) === Number(currentStaffId));
-            const badge = document.getElementById('staff-docs-count-badge');
-            if (badge) badge.textContent = `${docs.length} құжат`;
-
+            document.getElementById('staff-docs-count-badge').textContent = `${docs.length} құжат`;
             const listEl = document.getElementById('staff-docs-list');
-            if (!listEl) return;
-
             if (docs.length === 0) {
-                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Құжаттар тізімі әзірге бос.</div>`;
+                listEl.innerHTML = `<div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-500">Бұл қызметкердің әзірге PDF құжаты жоқ.</div>`;
                 return;
             }
-
             listEl.innerHTML = docs.map(d => {
                 const safeId = escapeHtml(String(d.id));
                 const isSelected = String(currentViewingDocId) === String(d.id);
                 return `
                 <div class="p-3 rounded-xl border ${isSelected ? 'border-brand-teal bg-brand-cream/70 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                    <div onclick="previewStaffDocById('${safeId}')" class="min-w-0 flex-1 cursor-pointer">
-                        <span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span>
-                        <span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span>
-                    </div>
+                    <div onclick="previewStaffDocById('${safeId}')" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)}</span></div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="previewStaffDocById('${safeId}')" title="Ашу" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="openEditStaffDocModal('${safeId}')" title="Өзгерту" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        <button type="button" onclick="deleteStaffDocById('${safeId}')" title="Өшіру" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="previewStaffDocById('${safeId}')" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="openEditStaffDocModal('${safeId}')" title="Өзгерту" class="admin-only p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white border border-amber-200 cursor-pointer transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="deleteStaffDocById('${safeId}')" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
             `}).join('');
@@ -2547,10 +2575,7 @@
         function openEditStaffDocModal(docId) {
             if (!ensureAdminAccess()) return;
             const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
-            if (!doc) {
-                showToast("Құжат табылмады!");
-                return;
-            }
+            if (!doc) return;
             editingStaffDoc = doc;
             document.getElementById('edit-staff-doc-title').value = doc.docTitle;
             document.getElementById('edit-staff-doc-file').value = '';
@@ -2570,187 +2595,173 @@
             const newTitle = document.getElementById('edit-staff-doc-title').value.trim();
             const newFile = document.getElementById('edit-staff-doc-file').files[0];
             if (!newTitle) return;
-
-            let fileUrl = editingStaffDoc.fileUrl;
-            let storagePath = editingStaffDoc.storagePath;
-            let fileName = editingStaffDoc.fileName;
-
+            let fileUrl = editingStaffDoc.fileUrl, storagePath = editingStaffDoc.storagePath, fileName = editingStaffDoc.fileName;
             if (newFile) {
-                showToast("Жаңа PDF жүктелуде...");
                 const uploaded = await uploadFileToStorage(newFile, `staff/staff_${editingStaffDoc.staffId}`, 'pdf');
                 if (!uploaded) return;
                 if (storagePath) await deleteFileFromStorage(storagePath);
-                fileUrl = uploaded.publicUrl;
-                storagePath = uploaded.storagePath;
-                fileName = newFile.name;
+                fileUrl = uploaded.publicUrl; storagePath = uploaded.storagePath; fileName = newFile.name;
             }
-
-            const { error } = await sb.from('documents').update({
-                title: newTitle,
-                content: {
-                    staffId: Number(editingStaffDoc.staffId),
-                    docTitle: newTitle,
-                    fileName,
-                    fileUrl,
-                    storagePath
-                }
-            }).eq('id', String(editingStaffDoc.id));
-
-            if (error) {
-                console.error("Update қатесі:", error);
-                showToast("Өзгерту қатесі: " + error.message);
-                return;
-            }
-
+            const { error } = await sb.from('documents').update({ title: newTitle, content: { staffId: editingStaffDoc.staffId, docTitle: newTitle, fileName, fileUrl, storagePath } }).eq('id', String(editingStaffDoc.id));
+            if (error) { showToast("Өзгерту қатесі: " + error.message); return; }
             const wasViewing = String(currentViewingDocId) === String(editingStaffDoc.id);
             const editedId = String(editingStaffDoc.id);
             closeEditStaffDocModal();
             await syncAllFromSupabase(false);
             renderStaffModalDocs();
             if (wasViewing) previewStaffDocById(editedId);
-            showToast("Құжат сәтті жаңартылды!");
+            showToast("Құжат жаңартылды!");
         }
 
         async function deleteStaffDocById(docId) {
-            if (!ensureAdminAccess()) return;
-            if (!confirm("Бұл құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-
+            if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
             const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
-
             const { error } = await sb.from('documents').delete().eq('id', String(docId));
-            if (error) {
-                console.error("Delete қатесі:", error);
-                showToast("Өшіру қатесі: " + error.message);
-                return;
-            }
-
+            if (error) { showToast("Өшіру қатесі: " + error.message); return; }
             if (String(currentViewingDocId) === String(docId)) resetStaffPdfViewer();
             await syncAllFromSupabase(false);
             renderStaffModalDocs();
-            showToast("Құжат сәтті өшірілді!");
+            showToast("PDF құжат өшірілді!");
         }
 
         function previewStaffDocById(docId) {
-            if (!ensureAdminAccess()) return;
             const doc = cloudPdfCache.staff.find(d => String(d.id) === String(docId));
-            if (!doc || !doc.fileUrl) {
-                showToast("PDF сілтемесі табылмады!");
-                return;
-            }
+            if (!doc || !doc.fileUrl) return;
             currentViewingPdfUrl = doc.fileUrl;
             currentViewingPdfDoc = doc;
             currentViewingDocId = String(doc.id);
-
             document.getElementById('staff-pdf-viewer-title').textContent = doc.docTitle;
-            const iframe = document.getElementById('staff-pdf-iframe');
-            iframe.src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
-
+            document.getElementById('staff-pdf-iframe').src = `${doc.fileUrl}#toolbar=1&navpanes=0&view=FitH`;
             document.getElementById('staff-pdf-empty-state').classList.add('hidden');
             document.getElementById('staff-pdf-viewer-box').classList.remove('hidden');
             renderStaffModalDocs();
         }
 
         function openStaffPdfNewTab() { if (currentViewingPdfUrl) window.open(currentViewingPdfUrl, '_blank'); }
-
-        function downloadCurrentStaffPdf() {
-            if (!ensureAdminAccess() || !currentViewingPdfUrl) return;
-            const a = document.createElement('a');
-            a.href = currentViewingPdfUrl;
-            a.download = (currentViewingPdfDoc && currentViewingPdfDoc.fileName) ? currentViewingPdfDoc.fileName : 'kuzhat.pdf';
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+        function downloadCurrentStaffPdf() { if (currentViewingPdfUrl) window.open(currentViewingPdfUrl, '_blank'); }
 
         function renderStaff() {
-            const list = document.getElementById('staff-list');
-            if (!list) return;
-            list.innerHTML = STAFF_DATA.map(s => `
-                <div onclick="openStaffModal(${s.id})" class="group bg-brand-cream/60 hover:bg-white rounded-2xl p-5 border-2 border-slate-200 hover:border-brand-gold shadow-sm hover:shadow-lg transition-all space-y-3 cursor-pointer">
-                    <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-xl bg-brand-teal group-hover:bg-brand-gold text-brand-gold group-hover:text-brand-tealDark font-extrabold text-base flex items-center justify-center">${s.name.charAt(0)}</div>
-                        <div><h4 class="text-base font-extrabold text-slate-900">${s.name}</h4><span class="inline-block px-2.5 py-0.5 rounded-full bg-brand-teal/10 text-brand-teal text-xs font-bold">${s.role}</span></div>
+            const container = document.getElementById('staff-list');
+            if (!container) return;
+            container.innerHTML = STAFF_DATA.map(s => {
+                const count = staffDocCounts[s.id] || 0;
+                const lockBadge = isAdminMode
+                    ? `<span class="px-2.5 py-0.5 rounded-full bg-brand-teal/10 text-brand-teal text-[11px] font-bold shrink-0">${count} PDF</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-extrabold shrink-0"><i data-lucide="lock" class="w-3 h-3"></i> Әкімшіге</span>`;
+                return `
+                    <div onclick="openStaffModal(${s.id})" class="group bg-brand-cream/50 hover:bg-white rounded-2xl p-5 border-2 border-brand-gold/30 hover:border-brand-gold shadow-xs hover:shadow-lg transition-all space-y-3 cursor-pointer">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-11 h-11 rounded-full bg-brand-teal text-brand-gold font-extrabold text-base flex items-center justify-center shrink-0">${s.name.charAt(0)}</div>
+                                <div class="min-w-0"><h4 class="text-sm font-extrabold text-slate-900 group-hover:text-brand-teal truncate transition-colors">${escapeHtml(s.name)}</h4><p class="text-xs font-semibold text-brand-teal truncate">${escapeHtml(s.role)}</p></div>
+                            </div>
+                            ${lockBadge}
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(s.resp)}</p>
+                        <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-bold text-brand-teal">
+                            <span>${isAdminMode ? 'Жеке іс қағаздарын ашу' : 'Әкімші құпиясөзімен ашылады'}</span>
+                            <span class="group-hover:underline">→</span>
+                        </div>
                     </div>
-                    <p class="text-xs text-slate-600">${s.resp}</p>
-                    <div class="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-bold">
-                        <span class="admin-only text-brand-teal">Жеке іс қағаздар: ${staffDocCounts[s.id] || 0} PDF</span>
-                        <span class="admin-only text-brand-teal">Ашу →</span>
-                        ${!isAdminMode ? `<span class="text-amber-700 flex items-center gap-1"><i data-lucide="lock" class="w-3.5 h-3.5"></i> Жеке іс қағаздар (Тек әкімшіге)</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             lucide.createIcons();
         }
 
-        function switchMainTab(tab) {
-            ['annual-plan', 'clubs', 'staff', 'mtb', 'paid-services', 'facebook-page'].forEach(t => document.getElementById(`section-${t}`)?.classList.toggle('hidden', t !== tab));
+        // ==================== НАВИГАЦИЯ ЖӘНЕ КӨМЕКШІ ФУНКЦИЯЛАР ====================
+        function switchMainTab(tabName) {
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = (btn.dataset.tab === tab)
-                    ? 'nav-btn active flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition cursor-pointer bg-brand-gold text-brand-tealDark font-extrabold shadow'
-                    : 'nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition cursor-pointer text-slate-200 hover:bg-white/10 font-semibold';
+                const active = btn.dataset.tab === tabName;
+                btn.className = `nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${active ? 'active font-bold bg-brand-gold text-brand-tealDark shadow' : 'font-semibold text-slate-200 hover:bg-white/10'}`;
             });
+            ['annual-plan', 'clubs', 'staff', 'mtb', 'paid-services', 'facebook-page'].forEach(sec => document.getElementById(`section-${sec}`)?.classList.toggle('hidden', sec !== tabName));
+            if (tabName === 'clubs') renderClubs();
+            if (tabName === 'staff') renderStaff();
+            if (tabName === 'mtb') { renderMtbMainView(); cancelMtbMainEdit(); }
+            if (tabName === 'paid-services') renderPaidServiceDocs();
+            if (tabName === 'facebook-page') applyFacebookPageUI();
             lucide.createIcons();
         }
-
-        function formatDocContentForDisplay(raw) { return raw ? sanitizeRichHtml(raw) : ''; }
-        function formatDocContentForEditor(raw) { return formatDocContentForDisplay(raw) || '<div><br></div>'; }
-        function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
         async function resetAllData() {
-            if (!ensureAdminAccess() || !confirm("Жоспар тізімін бастапқы 34 шараға қалпына келтіруді растайсыз ба?")) return;
-            await sb.from('documents').delete().eq('category', 'annual_event');
-            eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
-            renderQuartersSelector();
-            renderQuarterMonths(activeQuarter);
-            showToast("Жоспар тізімі бастапқы күйге келтірілді!");
+            if (!ensureAdminAccess() || !confirm("2026 жылғы жоспар тізімін бастапқы 34 іс-шараға келтіруге сенімдісіз бе?")) return;
+            const { error } = await sb.from('documents').delete().eq('category', 'annual_event');
+            if (error) { showToast("Қалпына келтіру қатесі: " + error.message); return; }
+            eventsData = DEFAULT_EVENTS.map(ev => ({ ...ev, originalTitle: ev.title }));
+            selectQuarter(1);
+            showToast("Тізім бастапқы күйге келтірілді!");
         }
 
-        function showToast(msg) {
-            const c = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            el.className = 'bg-brand-tealDark text-white border-2 border-brand-gold px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm font-bold flex items-center gap-2';
-            el.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-brand-gold shrink-0"></i><span>${escapeHtml(msg)}</span>`;
-            c.appendChild(el);
+        function formatDocContentForDisplay(text) {
+            if (!text) return '';
+            const raw = String(text).trim();
+            if (/<(p|div|br|b|strong|i|em|u|span|table|tbody|thead|tr|td|th|ul|ol|li|img|h[1-6]|font|section|article)\b[^>]*>/i.test(raw)) return sanitizeRichHtml(raw);
+            return raw.split('\n').map(line => `<div style="margin-bottom:4pt;">${line ? escapeHtml(line) : '&nbsp;'}</div>`).join('');
+        }
+
+        function formatDocContentForEditor(text) {
+            if (!text) return '<div><br></div>';
+            const raw = String(text).trim();
+            if (!raw) return '<div><br></div>';
+            if (/<(p|div|br|b|strong|i|em|u|span|table|tbody|thead|tr|td|th|ul|ol|li|img|h[1-6]|font|section|article)\b[^>]*>/i.test(raw)) return sanitizeRichHtml(raw);
+            return raw.split('\n').map(line => `<div>${line ? escapeHtml(line) : '<br>'}</div>`).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-brand-tealDark text-white border-l-4 border-brand-gold px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm font-semibold flex items-center gap-2.5 pointer-events-auto';
+            toast.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-brand-gold shrink-0"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
             lucide.createIcons();
-            setTimeout(() => el.remove(), 3500);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 3200);
         }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (!document.getElementById('admin-login-modal').classList.contains('hidden')) closeAdminLoginModal();
-                else if (!document.getElementById('paid-pdf-fullscreen-modal').classList.contains('hidden')) closePaidServiceFullscreen();
-                else if (!document.getElementById('insert-table-modal').classList.contains('hidden')) closeInsertTableModal();
-                else if (!document.getElementById('add-event-modal').classList.contains('hidden')) closeAddEventModal();
-                else if (!document.getElementById('edit-club-doc-modal').classList.contains('hidden')) closeEditClubDocModal();
-                else if (!document.getElementById('edit-staff-doc-modal').classList.contains('hidden')) closeEditStaffDocModal();
-                else if (!document.getElementById('club-pdf-viewer-box').classList.contains('hidden')) resetClubPdfViewer();
-                else if (!document.getElementById('club-dossier-modal').classList.contains('hidden')) closeClubModal();
-                else if (!document.getElementById('staff-dossier-modal').classList.contains('hidden')) closeStaffModal();
-                else if (!document.getElementById('document-modal').classList.contains('hidden')) closeDocumentModal();
+                if (!document.getElementById('admin-login-modal')?.classList.contains('hidden')) { closeAdminLoginModal(); return; }
+                if (!document.getElementById('paid-pdf-fullscreen-modal')?.classList.contains('hidden')) { closePaidServiceFullscreen(); return; }
+                if (!document.getElementById('edit-staff-doc-modal')?.classList.contains('hidden')) { closeEditStaffDocModal(); return; }
+                if (!document.getElementById('edit-club-doc-modal')?.classList.contains('hidden')) { closeEditClubDocModal(); return; }
+                if (!document.getElementById('insert-table-modal')?.classList.contains('hidden')) { closeInsertTableModal(); return; }
+                if (!document.getElementById('staff-dossier-modal')?.classList.contains('hidden')) { closeStaffModal(); return; }
+                if (!document.getElementById('club-dossier-modal')?.classList.contains('hidden')) {
+                    if (currentViewingClubPdfUrl) resetClubPdfViewer();
+                    else closeClubModal();
+                    return;
+                }
+                closeDocumentModal();
+                closeAddEventModal();
             }
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            applyRoleUIState();
+            eventsData = DEFAULT_EVENTS.map(ev => ({ ...ev, originalTitle: ev.title }));
             buildCleanWordSectionsDOM();
             initAllRichToolbars();
             updateMonthOptions();
-            applyFacebookPageUI();
-            eventsData = JSON.parse(JSON.stringify(DEFAULT_EVENTS)).map(ev => ({ ...ev, originalTitle: ev.title }));
             renderQuartersSelector();
-            renderQuarterMonths(1);
+            renderQuarterMonths(activeQuarter);
             renderClubs();
             renderStaff();
             renderMtbMainView();
-            await syncAllFromSupabase(false);
+            renderPaidServiceDocs();
+            applyFacebookPageUI();
+            applyRoleUIState();
+            lucide.createIcons();
+
             document.getElementById('global-search').addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase().trim();
-                if (!q) { renderQuartersSelector(); renderQuarterMonths(activeQuarter); }
+                const q = e.target.value.trim().toLowerCase();
+                if (!q) renderQuarterMonths(activeQuarter);
                 else renderSearchResults(q);
             });
-            lucide.createIcons();
+
+            await syncAllFromSupabase(false);
         });
     </script>
 </body>
