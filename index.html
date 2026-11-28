@@ -1225,7 +1225,13 @@
 
                 cloudPdfCache = { club: [], staff: [], paid: [] };
                 rows.slice().reverse().forEach(row => {
-                    const item = { id: Number(row.id), ...(row.content || {}), docTitle: row.title };
+                    const item = { id: String(row.id), ...(row.content || {}), docTitle: row.title };
+                    if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
+                    if (row.category === 'staff_pdf') cloudPdfCache.staff.push(item);
+                    if (row.category === 'paid_pdf') cloudPdfCache.paid.push(item);
+                });
+                rows.slice().reverse().forEach(row => {
+                    const item = { id: String(row.id), ...(row.content || {}), docTitle: row.title };
                     if (row.category === 'club_pdf') cloudPdfCache.club.push(item);
                     if (row.category === 'staff_pdf') cloudPdfCache.staff.push(item);
                     if (row.category === 'paid_pdf') cloudPdfCache.paid.push(item);
