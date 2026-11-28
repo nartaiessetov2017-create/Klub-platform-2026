@@ -2381,11 +2381,11 @@
                 return;
             }
             listEl.innerHTML = docs.map(d => `
-                <div class="p-3 rounded-xl border ${Number(currentViewingPaidDocId) === Number(d.id) ? 'border-brand-teal bg-brand-cream/80 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
-                    <div onclick="previewPaidDocById(${d.id})" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span></div>
+                <div class="p-3 rounded-xl border ${String(currentViewingPaidDocId) === String(d.id) ? 'border-brand-teal bg-brand-cream/80 shadow-xs' : 'border-slate-200 bg-white'} hover:border-brand-teal transition flex items-center justify-between gap-2">
+                    <div onclick="previewPaidDocById('${d.id}')" class="min-w-0 flex-1 cursor-pointer"><span class="block text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(d.docTitle)}</span><span class="block text-[11px] text-slate-500 truncate">${escapeHtml(d.fileName)} • Альбомдық PDF</span></div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="previewPaidDocById(${d.id})" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
-                        <button type="button" onclick="deletePaidDocById(${d.id})" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" onclick="previewPaidDocById('${d.id}')" class="px-2.5 py-1.5 rounded-lg bg-brand-teal/10 hover:bg-brand-teal text-brand-teal hover:text-white text-xs font-bold cursor-pointer transition">Ашу</button>
+                        <button type="button" onclick="deletePaidDocById('${d.id}')" title="Өшіру" class="admin-only p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 cursor-pointer transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -2393,7 +2393,7 @@
         }
 
         function previewPaidDocById(docId) {
-            const doc = cloudPdfCache.paid.find(d => Number(d.id) === Number(docId));
+            const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId)
             if (!doc || !doc.fileUrl) return;
             currentViewingPaidPdfUrl = doc.fileUrl; currentViewingPaidPdfDoc = doc; currentViewingPaidDocId = doc.id;
             document.getElementById('paid-pdf-viewer-title').textContent = `${doc.docTitle} (Альбомдық PDF)`;
@@ -2407,10 +2407,10 @@
 
         async function deletePaidDocById(docId) {
             if (!ensureAdminAccess() || !confirm("Бұл PDF құжатты ортақ базадан өшіруге сенімдісіз бе?")) return;
-            const doc = cloudPdfCache.paid.find(d => Number(d.id) === Number(docId));
+            const doc = cloudPdfCache.paid.find(d => String(d.id) === String(docId));
             if (doc && doc.storagePath) await deleteFileFromStorage(doc.storagePath);
             await sb.from('documents').delete().eq('id', docId);
-            if (Number(currentViewingPaidDocId) === Number(docId)) resetPaidPdfViewer();
+            if (String(currentViewingPaidDocId) === String(docId)) resetPaidPdfViewer();
             await syncAllFromSupabase(false);
             showToast("PDF құжат өшірілді!");
         }
